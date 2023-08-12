@@ -5,7 +5,7 @@ var multer = require('multer');
 var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
-const { getAllAgents, agentsLogin, forgotPassword, changePassword, setNewPassword, addNewAgent, updateAgents, deleteAgents } = require('../controllers/agentsController');
+const { getAllAgents, agentsLogin, agentsRegister, updateAgents, forgotPassword, changePassword, setNewPassword, deleteAgents } = require('../controllers/agentsController');
 
 var forms = multer();
 
@@ -16,37 +16,60 @@ router.use(forms.array());
 
 
 router.get('/', getAllAgents);
-router.delete('/:id', deleteAgents);
-
-router.post("/", [
-    body('name', 'Name is required').trim().notEmpty().isString().withMessage('Name must be a string')
-        .isLength({ min: 3 }).withMessage('Name must be at least 3 characters')
-        .matches(/^[a-zA-Z\s]+$/).withMessage('Name can only contain letters and spaces'),
-    body('branch_name', 'Branch Name is required').trim().notEmpty().isString().withMessage('Name must be a string')
-        .isLength({ min: 3 }).withMessage('Name must be at least 3 characters')
-        .matches(/^[a-zA-Z\s]+$/).withMessage('Name can only contain letters and spaces'),
-    body('email', "Invalid email address").notEmpty().escape().trim().isEmail(),
-    body('phone_no', "Mobile Number are Required").notEmpty().escape().trim().isLength({ min: 10, max: 10 }),
-], addNewAgent);
-
-router.put("/:id", [
-    body('id', "Agents ID is Required").notEmpty().escape().trim(),
-    body('agents_id', "Agents ID is Required").notEmpty().escape().trim(),
-    body('name', 'Name is required').trim().notEmpty().isString().withMessage('Name must be a string')
-        .isLength({ min: 3 }).withMessage('Name must be at least 3 characters')
-        .matches(/^[a-zA-Z\s]+$/).withMessage('Name can only contain letters and spaces'),
-    body('branch_name', 'Branch Name is required').trim().notEmpty().isString().withMessage('Name must be a string')
-        .isLength({ min: 3 }).withMessage('Name must be at least 3 characters')
-        .matches(/^[a-zA-Z\s]+$/).withMessage('Name can only contain letters and spaces'),
-    body('email', "Invalid email address").notEmpty().escape().trim().isEmail(),
-    body('phone_no', "Mobile Number are Required").notEmpty().escape().trim().isLength({ min: 10, max: 10 }),
-], updateAgents);
 
 router.post('/login', [
     body('agents_id', "Agents ID is Required").notEmpty().escape().trim(),
-    body('phone_no', "Mobile Number are Required").notEmpty().escape().trim().isLength({ min: 10, max: 10 }),
+    body('phone_number', "Mobile Number are Required").notEmpty().escape().trim().isLength({ min: 10, max: 10 }),
     body('password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
 ], agentsLogin);
+
+
+router.post("/register", [
+    body('name', 'Name is required').trim().notEmpty().isString().withMessage('Name must be a string')
+        .isLength({ min: 3 }).withMessage('Name must be at least 3 characters')
+        .matches(/^[a-zA-Z\s]+$/).withMessage('Name can only contain letters and spaces'),
+
+    body('business_name', 'Business Name is required').trim().notEmpty().isString().withMessage('Business Name must be a string')
+        .isLength({ min: 3 }).withMessage('Business Name must be at least 3 characters'),
+
+    body('branch_name', 'Branch Name is required').trim().notEmpty().isString().withMessage('Branch Name must be a string')
+        .isLength({ min: 3 }).withMessage('Branch Name must be at least 3 characters')
+        .matches(/^[a-zA-Z\s]+$/).withMessage('Branch Name can only contain letters and spaces'),
+
+    body('email', "Invalid email address").notEmpty().escape().trim().isEmail(),
+
+    body('phone_number', "Mobile Number are Required").notEmpty().escape().trim().isLength({ min: 10, max: 10 }),
+
+    body('password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
+
+    body('confirm_password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
+
+    body('country').notEmpty().withMessage('Country is required').isLength({ max: 50 }).withMessage('Country cannot exceed 50 characters'),
+], agentsRegister);
+
+router.put("/:id", [
+    body('id', "Agents ID is Required").notEmpty().escape().trim(),
+
+    body('agents_id', "Agents ID is Required").notEmpty().escape().trim(),
+
+    body('name', 'Name is required').trim().notEmpty().isString().withMessage('Name must be a string')
+        .isLength({ min: 3 }).withMessage('Name must be at least 3 characters')
+        .matches(/^[a-zA-Z\s]+$/).withMessage('Name can only contain letters and spaces'),
+    body('business_name', 'Business Name is required').trim().notEmpty().isString().withMessage('Business Name must be a string')
+        .isLength({ min: 3 }).withMessage('Business Name must be at least 3 characters'),
+
+    body('branch_name', 'Branch Name is required').trim().notEmpty().isString().withMessage('Name must be a string')
+        .isLength({ min: 3 }).withMessage('Name must be at least 3 characters')
+        .matches(/^[a-zA-Z\s]+$/).withMessage('Name can only contain letters and spaces'),
+
+    body('email', "Invalid email address").notEmpty().escape().trim().isEmail(),
+
+    body('phone_number', "Mobile Number are Required").notEmpty().escape().trim().isLength({ min: 10, max: 10 }),
+
+    body('country').notEmpty().withMessage('Country is required').isLength({ max: 50 }).withMessage('Country cannot exceed 50 characters'),
+], updateAgents);
+
+router.delete('/:id', deleteAgents);
 
 router.post('/forgot-password', [
     body('phone_no', "Mobile Number are Required").notEmpty().escape().trim().isLength({ min: 10, max: 10 }),
