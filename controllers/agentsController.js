@@ -148,7 +148,7 @@ exports.updateAgents = async (req, res) => {
 
 }
 
-exports.deleteAgents = async (req, res) => {
+exports.deleteAgents  = async (req, res) => {
 
     const { id } = req.params;
 
@@ -197,33 +197,6 @@ exports.forgotPassword = async (req, res) => {
         return res.json({ success: false, message: error.message });
     }
 }
-
-
-exports.checkOTP = async (req, res) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
-
-    const { otp } = req.body;
-    try {
-        const [row] = await connection.execute("SELECT * FROM agents WHERE `otp`=? ", [otp]);
-
-        if (row.length === 0) {
-            return res.json({ success: false, message: "Invalid OTP", });
-        } else {
-            return res.status(200).json({
-                success: true,
-                message: "OTP is Valid",
-                status: "success"
-            });
-        }
-    } catch (error) {
-        return res.json({ success: false, message: error.message });
-    }
-}
-
 
 exports.setNewPassword = async (req, res) => {
     const errors = validationResult(req);
