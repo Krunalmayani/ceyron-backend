@@ -1,7 +1,6 @@
 const { validationResult } = require("express-validator");
 const connection = require("../db").promise();
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const generateToken = require("../untils/generateToken");
 
 
@@ -188,9 +187,8 @@ exports.changePassword = async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    console.log('req.body :', req.body);
-    const { email, old_password, new_password, confirm_password } = req.body;
 
+    const { email, old_password, new_password, confirm_password } = req.body;
     const token = req?.headers?.authorization?.split(" ")[1];
     try {
         if (!token) {
@@ -209,7 +207,7 @@ exports.changePassword = async (req, res) => {
                     return res.json({ success: false, message: "Incorrect old password" });
                 } else {
                     const [val] = await connection.execute("UPDATE admin SET password=?  WHERE email=?", [hash_new_pass, email]);
-                    return res.json({ status: 200, status: "success", success: true, message: "New password has been succesfully updated !", });
+                    return res.json({ status: "success", success: true, message: "New password has been succesfully updated !", });
                 }
             } else {
                 return res.json({ success: false, message: "Email  is NOT Found" });
@@ -217,6 +215,56 @@ exports.changePassword = async (req, res) => {
         } else {
             return res.json({ success: false, message: "New Password and Old Password are not match" });
         }
+    } catch (error) {
+        return res.json({ success: false, error })
+    }
+}
+
+exports.globalSettings = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
+    try {
+        const [row] = await connection.execute('select * from global_settings')
+
+        if (row.length > 0) {
+            return res.json({ data: row[0], success: true, status: "success", })
+        } else {
+            return res.json({ success: false, message: "Unauthorized accress !" });
+        }
+
+    } catch (error) {
+        return res.json({ success: false, error })
+    }
+}
+
+exports.updateGlobalSettings = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+    const { id, transaction_limits, funding_limits, transaction_fees, fx_rates } = req.body;
+    const token = req?.headers?.authorization?.split(" ")[1];
+
+    try {
+        if (!token) {
+            return res.json({ success: false, message: "auth Token not found" });
+        }
+
+        const [rows] = await connection.execute("UPDATE global_settings SET transaction_limits=?, funding_limits=?,fx_rates=?,transaction_fees=? WHERE id=?", [transaction_limits, funding_limits, fx_rates, transaction_fees, Number(id)])
+
+        if (rows.affectedRows === 1) {
+            const [row] = await connection.execute('select * from global_settings WHERE id=?', [Number(id)])
+
+            return res.json({ success: true, status: "success", message: 'Settings successfully Update !', data: row[0] })
+        } else {
+            return res.json({ success: false, message: 'Not update Settings !' })
+        }
+
     } catch (error) {
         return res.json({ success: false, error })
     }

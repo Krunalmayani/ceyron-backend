@@ -5,7 +5,7 @@ var multer = require('multer');
 var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
-const { getAllUsers, updateUsers, deleteUsers, usersRegister, usersLogin } = require('../controllers/usersController');
+const { getAllUsers, getUserById, updateUsers, deleteUsers, usersRegister, usersLogin, setSecurityPin, changePassword, } = require('../controllers/usersController');
 
 
 var forms = multer();
@@ -15,7 +15,8 @@ router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 router.use(forms.array());
 
-router.get("/all-users", getAllUsers)
+router.get("/all-users", getAllUsers);
+router.get('/:users_id', getUserById);
 
 router.post('/login', [
     body('email', "Invalid email address").notEmpty().escape().trim().isEmail(),
@@ -38,8 +39,7 @@ router.post("/register", [
     body('country').notEmpty().withMessage('Country is required').isLength({ max: 50 }).withMessage('Country cannot exceed 50 characters'),
 ], usersRegister);
 
-router.put("/:id", [
-    body('user_id', "Users ID is Required").notEmpty().escape().trim(),
+router.put("/:users_id", [
     body('name', 'Name is required').trim().notEmpty().isString().withMessage('Name must be a string')
         .isLength({ min: 3 }).withMessage('Name must be at least 3 characters')
         .matches(/^[a-zA-Z\s]+$/).withMessage('Name can only contain letters and spaces'),
@@ -48,8 +48,22 @@ router.put("/:id", [
     body('country').notEmpty().withMessage('Country is required').isLength({ max: 50 }).withMessage('Country cannot exceed 50 characters'),
 ], updateUsers);
 
-router.delete("/:user_id", deleteUsers)
+router.delete("/:users_id", deleteUsers);
 
+router.post("/set-pin", [
+    body('users_id', "Users ID is Required").notEmpty().escape().trim(),
+    body('security_pin', "Security Pin is Required").notEmpty().escape().trim()
+        .isNumeric().withMessage('Security pin must be numeric').isLength({ min: 4, max: 4 }).withMessage('Security pin must be 4 digits'),
+    body('confirm_security_pin', "Confirm Security Pin is Required").notEmpty().escape().trim()
+        .isNumeric().withMessage('Security pin must be numeric').isLength({ min: 4, max: 4 }).withMessage('Security pin must be 4 digits'),
+], setSecurityPin);
+
+router.post("/change-password", [
+    body('users_id', "User ID is Required").notEmpty().escape().trim(),
+    body('old_password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
+    body('new_password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
+    body('confirm_password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
+], changePassword);
 
 router.get('/', function (req, res) {
     res.send('Hello World!');

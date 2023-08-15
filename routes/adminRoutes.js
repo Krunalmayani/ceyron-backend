@@ -5,7 +5,7 @@ var multer = require('multer');
 var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
-const { register, login, forgotPassword, changePassword, setNewPassword } = require('../controllers/adminController');
+const { register, login, forgotPassword, changePassword, setNewPassword, globalSettings, updateGlobalSettings } = require('../controllers/adminController');
 
 var forms = multer();
 
@@ -44,5 +44,24 @@ router.post('/change-password', [
     body('new_password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
     body('confirm_password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
 ], changePassword);
+
+
+router.get('/setting', globalSettings);
+
+router.put('/update-setting', [
+    body('transaction_limits')
+        .isDecimal().withMessage('Transaction limits must be a decimal number')
+        .isFloat({ gt: 0 }).withMessage('Transaction limits must be a positive number'),
+    body('funding_limits')
+        .isDecimal().withMessage('Funding limits must be a decimal number')
+        .isFloat({ gt: 0 }).withMessage('Funding limits must be a positive number'),
+    body('fx_rates')
+        .isDecimal().withMessage('FX rates must be a decimal number')
+        .isFloat({ gt: 0 }).withMessage('FX rates must be a positive number'),
+    body('transaction_fees')
+        .isDecimal().withMessage('Transaction fees must be a decimal number')
+        .isFloat({ gt: -1 }).withMessage('Transaction fees must be a non-negative number'),
+
+], updateGlobalSettings)
 
 module.exports = router;

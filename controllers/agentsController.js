@@ -32,6 +32,33 @@ exports.getAllAgents = async (req, res) => {
     }
 }
 
+exports.getAgentsById = async (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+    const { agents_id } = req.params;
+    const token = req?.headers?.authorization?.split(" ")[1];
+    ;
+    try {
+        if (!token) {
+            return res.json({ success: false, message: "auth Token not found" });
+        }
+        const [row] = await connection.execute('select * from agents where agents_id=?', [agents_id])
+
+        if (row.length > 0) {
+            return res.json({ data: row, success: true, status: "success", })
+        } else {
+            return res.json({ success: false, message: "Unauthorized accress !" });
+        }
+
+    } catch (error) {
+        return res.json({ success: false, error })
+    }
+}
+
 exports.agentsLogin = async (req, res) => {
     const errors = validationResult(req);
 
@@ -57,7 +84,7 @@ exports.agentsLogin = async (req, res) => {
 
                     const [cols] = await connection.execute("SELECT * FROM agents WHERE `agents_id`=?", [agents_id]);
 
-                    return res.status(200).json({ success: true, message: "Logged in successfully 😊", token: theToken, agent: cols[0], status: "success" });
+                    return res.status(200).json({ success: true, message: "Logged in successfully 😊", token: theToken, data: cols[0], status: "success" });
                 } else {
                     return res.json({ success: false, message: "jwtToken not generate Please login again !", });
                 }
@@ -102,7 +129,7 @@ exports.agentsRegister = async (req, res) => {
                     } else {
                         return res.json({
                             success: false,
-                            message: "Feild Register !!!.",
+                            message: "Feild Register Please Try Again !!!.",
                         });
                     }
                 } else {
@@ -127,16 +154,18 @@ exports.updateAgents = async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors });
     }
-    const { id, agents_id, name, business_name, branch_name, email, phone_number, country } = req.body
+
+    const { agents_id } = req.params;
+    const { name, business_name, branch_name, email, phone_number, country } = req.body
 
     const token = req?.headers?.authorization?.split(" ")[1];
     try {
         if (!token) {
             return res.json({ success: false, message: "auth Token not found" });
         }
-        const [rows] = await connection.execute("UPDATE agents SET agents_id=?, name=?, business_name=?, branch_name=?, email=?, phone_number=?,country=? WHERE id=?", [agents_id, name, business_name, branch_name, email, phone_number, country, id])
+        const [rows] = await connection.execute("UPDATE agents SET  name=?, business_name=?, branch_name=?, email=?, phone_number=?,country=? WHERE agents_id=?", [name, business_name, branch_name, email, phone_number, country, agents_id])
         if (rows.affectedRows === 1) {
-            const [row] = await connection.execute('select * from agents WHERE id=?', [id])
+            const [row] = await connection.execute('select * from agents WHERE agents_id=?', [agents_id])
 
             return res.json({ success: true, status: "success", message: 'Agents successfully Update !', data: row[0] })
         } else {
@@ -148,26 +177,25 @@ exports.updateAgents = async (req, res) => {
 
 }
 
-exports.deleteAgents  = async (req, res) => {
+exports.deleteAgents = async (req, res) => {
 
-    const { id } = req.params;
+    const { agents_id } = req.params;
 
     const token = req?.headers?.authorization?.split(" ")[1];
     try {
         if (!token) {
             return res.json({ success: false, message: "auth Token not found" });
         }
-        const [rows] = await connection.execute("DELETE FROM agents WHERE id=?", [id])
+        const [rows] = await connection.execute("DELETE FROM agents WHERE agents_id=?", [agents_id])
 
 
         if (rows.affectedRows === 1) {
 
-            return res.json({ success: true, status: "success", message: 'Agents successfully Delete !', data: id })
+            return res.json({ success: true, status: "success", message: 'Agents successfully Delete !', data: agents_id })
         } else {
-            return res.json({ success: false, message: 'Not update !' })
+            return res.json({ success: false, message: 'Agents ID Not Found !' })
         }
     } catch (error) {
-        console.log('error:', error);
         return res.json({ success: false, error })
     }
 }
@@ -233,14 +261,12 @@ exports.setNewPassword = async (req, res) => {
     }
 }
 
-
 exports.changePassword = async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-
     const { agents_id, old_password, new_password, confirm_password } = req.body;
 
     const token = req?.headers?.authorization?.split(" ")[1];
@@ -261,7 +287,7 @@ exports.changePassword = async (req, res) => {
                     return res.json({ success: false, message: "Incorrect old password" });
                 } else {
                     const [val] = await connection.execute("UPDATE agents SET password=?  WHERE agents_id=?", [hash_new_pass, agents_id]);
-                    return res.json({ status: 200, success: true, status: "success", message: "New password has been succesfully updated !", });
+                    return res.json({ success: true, status: "success", message: "New password has been succesfully updated !", });
                 }
             } else {
                 return res.json({ success: false, message: "Agents ID  is NOT Found" });
@@ -271,5 +297,38 @@ exports.changePassword = async (req, res) => {
         }
     } catch (error) {
         return res.json({ success: false, message: error.message });
+    }
+}
+
+exports.setSecurityPin = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors });
+    }
+    const { agents_id, security_pin, confirm_security_pin } = req.body;
+    const token = req?.headers?.authorization?.split(" ")[1];
+
+    try {
+        if (!token) {
+            return res.json({ success: false, message: "auth Token not found" });
+        }
+        if (security_pin !== confirm_security_pin) {
+            return res.json({ success: false, message: "Both Pin are not same!" });
+        }
+        const [row] = await connection.execute("SELECT * FROM agents WHERE `agents_id`=? ", [agents_id]);
+        if (row.length > 0) {
+            const [rows] = await connection.execute("UPDATE agents SET security_pin=? WHERE agents_id=?", [security_pin, Number(agents_id)]);
+            if (rows.affectedRows === 1) {
+                const [row] = await connection.execute('select * from agents WHERE agents_id=?', [Number(agents_id)])
+
+                return res.json({ success: true, status: "success", message: 'Pin successfully save!', data: row[0] })
+            } else {
+                return res.json({ success: false, message: 'Pin is Not Set!' })
+            }
+        }
+
+    } catch (error) {
+        return res.json({ success: false, error })
     }
 }
