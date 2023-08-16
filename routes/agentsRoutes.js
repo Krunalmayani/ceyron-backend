@@ -5,7 +5,8 @@ var multer = require('multer');
 var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
-const { getAllAgents, agentsLogin, agentsRegister, updateAgents, forgotPassword, changePassword, setNewPassword, deleteAgents, setSecurityPin, getAgentsById } = require('../controllers/agentsController');
+const { getAllUsers, getUserById, setSecurityPin, changePassword, deleteUsers } = require('../controllers/usersController');
+const { agentsLogin, agentsRegister, forgotPassword, updateAgents } = require('../controllers/agentsController');
 
 var forms = multer();
 
@@ -15,9 +16,9 @@ router.use(bodyParser.json());
 router.use(forms.array());
 
 
-router.get('/', getAllAgents);
+router.get('/', getAllUsers);
 
-router.get('/:agents_id', getAgentsById);
+router.get('/:id', getUserById);
 
 router.post('/login', [
     body('agents_id', "Agents ID is Required").notEmpty().escape().trim(),
@@ -47,9 +48,10 @@ router.post("/register", [
     body('confirm_password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
 
     body('country').notEmpty().withMessage('Country is required').isLength({ max: 50 }).withMessage('Country cannot exceed 50 characters'),
+    body('role', "Role is required").notEmpty().escape().trim(),
 ], agentsRegister);
 
-router.put("/:agents_id", [
+router.put("/:id", [
 
     body('name', 'Name is required').trim().notEmpty().isString().withMessage('Name must be a string')
         .isLength({ min: 3 }).withMessage('Name must be at least 3 characters')
@@ -68,10 +70,10 @@ router.put("/:agents_id", [
     body('country').notEmpty().withMessage('Country is required').isLength({ max: 50 }).withMessage('Country cannot exceed 50 characters'),
 ], updateAgents);
 
-router.delete('/:agents_id', deleteAgents);
+router.delete('/:id', deleteUsers);
 
 router.post("/set-pin", [
-    body('agents_id', "Agents ID is Required").notEmpty().escape().trim(),
+    body('id', "Agents ID is Required").notEmpty().escape().trim(),
     body('security_pin', "Security Pin is Required").notEmpty().escape().trim()
         .isNumeric().withMessage('Security pin must be numeric').isLength({ min: 4, max: 4 }).withMessage('Security pin must be 4 digits'),
     body('confirm_security_pin', "Confirm Security Pin is Required").notEmpty().escape().trim()
@@ -79,20 +81,12 @@ router.post("/set-pin", [
 ], setSecurityPin);
 
 router.post("/change-password", [
-    body('agents_id', "Agents ID is Required").notEmpty().escape().trim(),
+    body('id', "Agents ID is Required").notEmpty().escape().trim(),
     body('old_password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
     body('new_password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
     body('confirm_password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
 ], changePassword);
 
-router.post('/set-password', [
-    body('agents_id', "Agents ID is Required").notEmpty().escape().trim(),
-    body('new_password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
-    body('confirm_password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
-], setNewPassword);
-
-router.post('/forgot-password', [
-    body('phone_no', "Mobile Number are Required").notEmpty().escape().trim().isLength({ min: 10, max: 10 }),
-], forgotPassword);
 
 module.exports = router;
+
