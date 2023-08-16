@@ -11,7 +11,7 @@ exports.register = async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    const { first_name, last_name, user_name, email, password } = req.body;
+    const { first_name, last_name, user_name, email, phone_number, password } = req.body;
 
     try {
         const [row] = await connection.execute("SELECT * FROM admin WHERE `email`=?", [email]);
@@ -22,8 +22,8 @@ exports.register = async (req, res) => {
             const theToken = generateToken(email)
 
             const [rows] = await connection.execute(
-                "INSERT INTO admin(`first_name`,`last_name`,`user_name`,`email`,`password`,access_token) VALUES(?,?,?,?,?,?)",
-                [first_name, last_name, user_name, email, hash_pass, theToken]
+                "INSERT INTO admin(`first_name`,`last_name`,`user_name`,`email`,`phone_number`,`password`,access_token) VALUES(?,?,?,?,?,?,?)",
+                [first_name, last_name, user_name, email, phone_number, hash_pass, theToken]
             );
             if (rows.affectedRows === 1) {
                 const [col] = await connection.execute("SELECT * FROM admin WHERE email=?", [email]);
@@ -215,27 +215,6 @@ exports.changePassword = async (req, res) => {
         } else {
             return res.json({ success: false, message: "New Password and Old Password are not match" });
         }
-    } catch (error) {
-        return res.json({ success: false, error })
-    }
-}
-
-exports.globalSettings = async (req, res) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
-
-    try {
-        const [row] = await connection.execute('select * from global_settings')
-
-        if (row.length > 0) {
-            return res.json({ data: row[0], success: true, status: "success", })
-        } else {
-            return res.json({ success: false, message: "Unauthorized accress !" });
-        }
-
     } catch (error) {
         return res.json({ success: false, error })
     }

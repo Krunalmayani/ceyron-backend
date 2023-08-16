@@ -5,9 +5,10 @@ const cors = require("cors");
 const bodyParser = require('body-parser');
 
 const adminRoutes = require('./routes/adminRoutes');
-const agentsRoutes = require("./routes/agentsRoutes")
-const usersRoutes = require("./routes/usersRoutes")
-const transactionRoutes = require("./routes/transactionRoutes")
+const agentsRoutes = require("./routes/agentsRoutes");
+const usersRoutes = require("./routes/usersRoutes");
+const transactionRoutes = require("./routes/transactionRoutes");
+const settingRoutes = require("./routes/settingRoutes");
 
 var app = express();
 
@@ -21,7 +22,8 @@ app.use(cors());
 app.use('/admin', adminRoutes);
 app.use('/agents', agentsRoutes);
 app.use('/users', usersRoutes);
-app.use('/transactions', transactionRoutes)
+app.use('/transactions', transactionRoutes);
+app.use('/global', settingRoutes);
 
 app.get('/', function (req, res) {
     res.send('Hello World!');

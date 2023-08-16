@@ -5,7 +5,7 @@ var multer = require('multer');
 var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
-const { register, login, forgotPassword, changePassword, setNewPassword, globalSettings, updateGlobalSettings } = require('../controllers/adminController');
+const { register, login, forgotPassword, changePassword, setNewPassword, updateGlobalSettings } = require('../controllers/adminController');
 
 var forms = multer();
 
@@ -20,6 +20,7 @@ router.post('/register', [
     body('last_name', "Fill this feild").notEmpty(),
     body('user_name', "The name must be of minimum 3 characters length").notEmpty().escape().trim().isLength({ min: 3 }),
     body('email', "Invalid email address").notEmpty().escape().trim().isEmail(),
+    body('phone_number', "Mobile Number are Required").notEmpty().escape().trim().isLength({ min: 10, max: 10 }),
     body('password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 })
 ], register);
 
@@ -45,8 +46,6 @@ router.post('/change-password', [
     body('confirm_password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
 ], changePassword);
 
-
-router.get('/setting', globalSettings);
 
 router.put('/update-setting', [
     body('transaction_limits')
