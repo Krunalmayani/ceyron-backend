@@ -14,7 +14,7 @@ exports.getAllAgents = async (req, res) => {
         return res.status(422).json({ errors: errors.array() });
     }
     const token = req?.headers?.authorization?.split(" ")[1];
-    ;
+
     try {
         if (!token) {
             return res.json({ success: false, message: "auth Token not found" });
@@ -41,7 +41,7 @@ exports.getAgentsById = async (req, res) => {
     }
     const { agents_id } = req.params;
     const token = req?.headers?.authorization?.split(" ")[1];
-    ;
+
     try {
         if (!token) {
             return res.json({ success: false, message: "auth Token not found" });
