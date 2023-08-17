@@ -5,6 +5,61 @@ const bcrypt = require("bcryptjs");
 const generateUniqueId = require('generate-unique-id');
 const generateToken = require("../untils/generateToken");
 
+exports.getAllAgents = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
+    const token = req?.headers?.authorization?.split(" ")[1];
+    try {
+        if (!token) {
+            return res.json({ success: false, message: "auth Token not found" });
+        } else {
+
+
+            const [row] = await connection.execute('select * from users where role=?', ['Agent']);
+
+            if (row.length > 0) {
+                return res.json({ data: row, success: true, status: 'success' })
+            } else {
+                return res.json({ success: false, message: "Data Not Found !" });
+            }
+        }
+    } catch (error) {
+        return res.json({ success: false, error })
+    }
+}
+
+exports.getAgentById = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+    const { id } = req.params;
+
+    const token = req?.headers?.authorization?.split(" ")[1];
+    try {
+        if (!token) {
+            return res.json({ success: false, message: "auth Token not found" });
+        } else {
+
+
+            const [row] = await connection.execute('select * from users where id=? AND role=?', [id, 'Agent'])
+
+            if (row.length > 0) {
+                return res.json({ data: row, success: true, status: 'success' })
+            } else {
+                return res.json({ success: false, message: "Data Not Found !" });
+            }
+        }
+    } catch (error) {
+        return res.json({ success: false, error })
+    }
+}
+
 
 exports.agentsLogin = async (req, res) => {
     const errors = validationResult(req);

@@ -18,7 +18,7 @@ exports.getAllUsers = async (req, res) => {
         } else {
 
 
-            const [row] = await connection.execute('select * from users')
+            const [row] = await connection.execute('select * from users where role=?', ['User'])
 
             if (row.length > 0) {
                 return res.json({ data: row, success: true, status: 'success' })
@@ -46,7 +46,7 @@ exports.getUserById = async (req, res) => {
         } else {
 
 
-            const [row] = await connection.execute('select * from users where id=?', [id])
+            const [row] = await connection.execute('select * from users where id=? AND role=?', [id, 'User'])
 
             if (row.length > 0) {
                 return res.json({ data: row, success: true, status: 'success' })
