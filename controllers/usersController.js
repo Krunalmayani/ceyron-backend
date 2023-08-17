@@ -192,7 +192,6 @@ exports.deleteUsers = async (req, res) => {
         }
         const [rows] = await connection.execute("DELETE FROM users WHERE id=?", [id])
 
-
         if (rows.affectedRows === 1) {
 
             return res.json({ success: true, status: "success", message: 'Users successfully Delete !', data: id })
@@ -230,6 +229,8 @@ exports.setSecurityPin = async (req, res) => {
             } else {
                 return res.json({ success: false, message: 'Pin is Not Set!' })
             }
+        } else {
+            return res.json({ success: false, message: 'Data Not Found !!' })
         }
 
     } catch (error) {

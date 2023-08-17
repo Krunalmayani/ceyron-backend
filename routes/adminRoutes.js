@@ -1,19 +1,14 @@
 
 var express = require('express');
 const cors = require('cors');
-var multer = require('multer');
 var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
 const { register, login, forgotPassword, changePassword, setNewPassword, updateGlobalSettings } = require('../controllers/adminController');
 
-var forms = multer();
-
 router.use(cors());
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
-router.use(forms.array());
-
 
 router.post('/register', [
     body('first_name', "Fill this feild").notEmpty(),

@@ -1,22 +1,18 @@
 
 var express = require('express');
 const cors = require('cors');
-var multer = require('multer');
 var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
 const { getAllUsers, getUserById, updateUsers, deleteUsers, usersRegister, usersLogin, setSecurityPin, changePassword, } = require('../controllers/usersController');
 
-
-var forms = multer();
-
 router.use(cors());
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
-router.use(forms.array());
 
 router.get("/", getAllUsers);
 router.get('/:id', getUserById);
+
 router.post("/register", [
     body('name', 'Name is required').trim().notEmpty().isString().withMessage('Name must be a string')
         .isLength({ min: 3 }).withMessage('Name must be at least 3 characters')
