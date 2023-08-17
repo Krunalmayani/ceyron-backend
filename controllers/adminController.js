@@ -11,10 +11,10 @@ exports.register = async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    const { first_name, last_name, user_name, email, phone_number, password } = req.body;
+    const { name, email, phone_number, password } = req.body;
 
     try {
-        const [row] = await connection.execute("SELECT * FROM admin WHERE `email`=?", [email]);
+        const [row] = await connection.execute("SELECT * FROM users WHERE `email`=?", [email]);
         if (row.length > 0) {
             return res.json({ success: false, message: "The E-mail already in use", });
         } else {
@@ -22,11 +22,11 @@ exports.register = async (req, res) => {
             const theToken = generateToken(email)
 
             const [rows] = await connection.execute(
-                "INSERT INTO admin(`first_name`,`last_name`,`user_name`,`email`,`phone_number`,`password`,access_token) VALUES(?,?,?,?,?,?,?)",
-                [first_name, last_name, user_name, email, phone_number, hash_pass, theToken]
+                "INSERT INTO users(`name`,`email`,`phone_number`,`password`,access_token) VALUES(?,?,?,?,?,?,?)",
+                [name, email, phone_number, hash_pass, theToken]
             );
             if (rows.affectedRows === 1) {
-                const [col] = await connection.execute("SELECT * FROM admin WHERE email=?", [email]);
+                const [col] = await connection.execute("SELECT * FROM users WHERE email=?", [email]);
                 return res.json({
                     success: true,
                     status: 'success',
@@ -56,7 +56,7 @@ exports.login = async (req, res) => {
 
     const { email, password } = req.body;
     try {
-        const [row] = await connection.execute("SELECT * FROM admin WHERE `email`=?", [email]);
+        const [row] = await connection.execute("SELECT * FROM users WHERE `email`=?", [email]);
 
         if (row.length === 0) {
             return res.json({ success: false, message: "Invalid email address", });
@@ -68,9 +68,9 @@ exports.login = async (req, res) => {
                 const theToken = generateToken(email);
                 if (theToken) {
 
-                    const [rows] = await connection.execute("UPDATE admin SET access_token =?  WHERE email=?", [theToken, email]);
+                    const [rows] = await connection.execute("UPDATE users SET access_token =?  WHERE email=?", [theToken, email]);
 
-                    const [cols] = await connection.execute("SELECT * FROM admin WHERE `email`=?", [email]);
+                    const [cols] = await connection.execute("SELECT * FROM users WHERE `email`=?", [email]);
 
                     return res.status(200).json({
                         success: true,
@@ -101,41 +101,15 @@ exports.forgotPassword = async (req, res) => {
 
     const { email } = req.body;
     try {
-        const [row] = await connection.execute("SELECT * FROM admin WHERE email=?", [email]);
+        const [row] = await connection.execute("SELECT * FROM users WHERE email=?", [email]);
 
         if (row.length === 0) {
-            return res.json({ success: false, message: "Invalid Mobile Number  ", });
+            return res.json({ success: false, message: "Invalid Email addres  ", });
         } else {
             //  otp valu baki
             return res.status(200).json({
                 success: true,
                 message: "Logged in successfully 😊",
-                status: "success"
-            });
-        }
-    } catch (error) {
-        return res.json({ success: false, error })
-    }
-}
-
-
-exports.checkOTP = async (req, res) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
-    }
-
-    const { otp } = req.body;
-    try {
-        const [row] = await connection.execute("SELECT * FROM admin WHERE `otp`=? ", [otp]);
-
-        if (row.length === 0) {
-            return res.json({ success: false, message: "Invalid OTP", });
-        } else {
-            return res.status(200).json({
-                success: true,
-                message: "OTP is Valid",
                 status: "success"
             });
         }
@@ -158,10 +132,10 @@ exports.setNewPassword = async (req, res) => {
     try {
         if (new_password === confirm_password) {
 
-            const [row] = await connection.execute("SELECT * FROM admin WHERE email=?", [email]);
+            const [row] = await connection.execute("SELECT * FROM users WHERE email=?", [email]);
 
             if (row.length > 0) {
-                const [rows] = await connection.execute("UPDATE admin SET password=?  WHERE email=?", [hash_pass, email]);
+                const [rows] = await connection.execute("UPDATE users SET password=?  WHERE email=?", [hash_pass, email]);
 
                 if (rows.affectedRows === 1) {
                     return res.json({ success: true, status: "success", message: "Password reset successful, you can now login with the new password" });
@@ -196,7 +170,7 @@ exports.changePassword = async (req, res) => {
         }
         if (new_password === confirm_password) {
 
-            const [row] = await connection.execute("SELECT * FROM admin WHERE email=?", [email]);
+            const [row] = await connection.execute("SELECT * FROM users WHERE email=?", [email]);
 
             if (row.length > 0) {
 
@@ -206,7 +180,7 @@ exports.changePassword = async (req, res) => {
                 if (!hash_old_pass) {
                     return res.json({ success: false, message: "Incorrect old password" });
                 } else {
-                    const [val] = await connection.execute("UPDATE admin SET password=?  WHERE email=?", [hash_new_pass, email]);
+                    const [val] = await connection.execute("UPDATE users SET password=?  WHERE email=?", [hash_new_pass, email]);
                     return res.json({ status: "success", success: true, message: "New password has been succesfully updated !", });
                 }
             } else {
