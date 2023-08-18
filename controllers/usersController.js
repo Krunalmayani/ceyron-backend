@@ -58,6 +58,34 @@ exports.getUserById = async (req, res) => {
         return res.json({ success: false, error })
     }
 }
+exports.getUserByUserId = async (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+    const { users_id } = req.params;
+
+    const token = req?.headers?.authorization?.split(" ")[1];
+    try {
+        if (!token) {
+            return res.json({ success: false, message: "auth Token not found" });
+        } else {
+
+
+            const [row] = await connection.execute('select * from users where users_id=? ', [users_id])
+
+            if (row.length > 0) {
+                return res.json({ success: true, status: 'success', data: row })
+            } else {
+                return res.json({ success: false, message: "Data Not Found !" });
+            }
+        }
+    } catch (error) {
+        return res.json({ success: false, error })
+    }
+}
 
 exports.usersLogin = async (req, res) => {
     const errors = validationResult(req);

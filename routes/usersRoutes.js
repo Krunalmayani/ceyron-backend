@@ -4,7 +4,7 @@ const cors = require('cors');
 var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
-const { getAllUsers, getUserById, updateUsers, deleteUsers, usersRegister, usersLogin, setSecurityPin, changePassword, } = require('../controllers/usersController');
+const { getAllUsers, getUserById, updateUsers, deleteUsers, usersRegister, usersLogin, setSecurityPin, changePassword, getUserByUserId, } = require('../controllers/usersController');
 
 router.use(cors());
 router.use(bodyParser.urlencoded({ extended: false }));
@@ -12,6 +12,7 @@ router.use(bodyParser.json());
 
 router.get("/", getAllUsers);
 router.get('/:id', getUserById);
+router.get('/users_id/:users_id', getUserByUserId);
 
 router.post("/register", [
     body('name', 'Name is required').trim().notEmpty().isString().withMessage('Name must be a string')
