@@ -11,6 +11,7 @@ const usersRoutes = require("./routes/usersRoutes");
 const transactionRoutes = require("./routes/transactionRoutes");
 const settingRoutes = require("./routes/settingRoutes");
 const { TransferAmount } = require('./controllers/transactionsController');
+const { verifyPin } = require('./controllers/settingController');
 
 var app = express();
 var forms = multer();
@@ -29,6 +30,7 @@ app.use('/users', usersRoutes);
 app.use('/transactions', transactionRoutes);
 app.use('/global', settingRoutes);
 app.post('/transfer', TransferAmount);
+app.post('/verify-pin', verifyPin)
 
 app.get('/', function (req, res) {
     res.send('Hello World!');

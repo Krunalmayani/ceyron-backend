@@ -5,7 +5,7 @@ var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
 const { setSecurityPin, changePassword, deleteUsers } = require('../controllers/usersController');
-const { agentsLogin, agentsRegister, updateAgents, getAllAgents, getAgentById } = require('../controllers/agentsController');
+const { agentsLogin, agentsRegister, updateAgents, getAllAgents, getAgentById, getAgentByUserId } = require('../controllers/agentsController');
 
 router.use(cors());
 router.use(bodyParser.urlencoded({ extended: false }));
@@ -14,6 +14,8 @@ router.use(bodyParser.json());
 router.get('/', getAllAgents);
 
 router.get('/:id', getAgentById);
+
+router.get('/id/:users_id', getAgentByUserId);
 
 router.post('/login', [
     body('agents_id', "Agents ID is Required").notEmpty().escape().trim(),
