@@ -49,7 +49,7 @@ exports.verifyPin = async (req, res) => {
         const [row] = await connection.execute('select * from users where id=?', [id])
 
         if (row[0].security_pin === pin) {
-            return res.json({ success: true, status: "success", data: row[0] })
+            return res.json({ success: true, status: "success", data: row[0], message: "Success! PIN Verified." })
         } else {
             return res.json({ success: false, message: "Invalid Pin!" });
         }
