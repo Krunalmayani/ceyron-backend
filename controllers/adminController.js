@@ -2,6 +2,7 @@ const { validationResult } = require("express-validator");
 const connection = require("../db").promise();
 const bcrypt = require("bcryptjs");
 const generateToken = require("../untils/generateToken");
+const generateUniqueId = require("generate-unique-id");
 
 
 
@@ -20,10 +21,10 @@ exports.register = async (req, res) => {
         } else {
             const hash_pass = await bcrypt.hash(password, 12);
             const theToken = generateToken(email)
-
+            const admin_id = generateUniqueId({ length: 10, useLetters: false });
             const [rows] = await connection.execute(
-                "INSERT INTO users(`name`,`email`,`phone_number`,`password`,access_token) VALUES(?,?,?,?,?,?,?)",
-                [name, email, phone_number, hash_pass, theToken]
+                "INSERT INTO users(`users_id`,`name`,`email`,`phone_number`,`password`,`role`,`access_token`) VALUES(?,?,?,?,?,?,?)",
+                [admin_id, name, email, phone_number, hash_pass, 'Admin', theToken]
             );
             if (rows.affectedRows === 1) {
                 const [col] = await connection.execute("SELECT * FROM users WHERE email=?", [email]);

@@ -11,9 +11,7 @@ router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
 router.post('/register', [
-    body('first_name', "Fill this feild").notEmpty(),
-    body('last_name', "Fill this feild").notEmpty(),
-    body('user_name', "The name must be of minimum 3 characters length").notEmpty().escape().trim().isLength({ min: 3 }),
+    body('name', "Fill this feild").notEmpty(),
     body('email', "Invalid email address").notEmpty().escape().trim().isEmail(),
     body('phone_number', "Mobile Number are Required").notEmpty().escape().trim().isLength({ min: 10, max: 10 }),
     body('password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 })
@@ -43,6 +41,7 @@ router.post('/change-password', [
 
 
 router.put('/update-setting', [
+    body('id', "ID is Required").notEmpty().escape().trim(),
     body('transaction_limits')
         .isDecimal().withMessage('Transaction limits must be a decimal number')
         .isFloat({ gt: 0 }).withMessage('Transaction limits must be a positive number'),

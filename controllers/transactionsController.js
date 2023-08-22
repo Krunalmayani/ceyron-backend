@@ -38,6 +38,7 @@ exports.TransferAmount = async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
+
     const { sender_id, receiver_id, amount, transaction_fees, transaction_type, final_amount, note } = req.body;
     const token = req?.headers?.authorization?.split(" ")[1];
     try {
@@ -47,6 +48,7 @@ exports.TransferAmount = async (req, res) => {
 
         const [rows] = await connection.execute('select name,balance from users where users_id=?', [sender_id]);
         const [cols] = await connection.execute('select name,balance from users where users_id=?', [receiver_id]);
+        const [settings] = await connection.execute('select * from global_settings');
 
         if (rows.length === 0) {
             return res.json({ success: false, message: "Sender ID is invalid !", });
@@ -56,20 +58,24 @@ exports.TransferAmount = async (req, res) => {
         }
         const sender_balance = rows[0].balance;
 
-        if (sender_balance < amount) {
+        const transactionFee = (Number(amount) * Number(transaction_fees)) / 100; // Example: 1% fee
+        const netAmount = Number(amount) + transactionFee;
+
+        if (Number(netAmount) > Number(settings[0].transaction_limits)) {
+            return res.json({ success: false, message: "Transfer amount exceeds transaction limit", });
+        }
+
+        if (sender_balance < netAmount) {
             return res.json({ success: false, message: "Insufficient balance. !", });
         }
 
-        const transactionFee = (amount * transaction_fees) / 100; // Example: 1% fee
-        const netAmount = amount - transactionFee;
-
-        const [sender] = await connection.execute("UPDATE users SET balance = balance - ? WHERE users_id=?", [amount, sender_id]);
+        const [sender] = await connection.execute("UPDATE users SET balance = balance - ? WHERE users_id=?", [netAmount, sender_id]);
 
         if (sender.affectedRows !== 1) {
             res.json({ success: false, message: 'Error deducting balance.' });
         }
 
-        const [receiver] = await connection.execute("UPDATE users SET balance = balance + ? WHERE users_id=?", [netAmount, receiver_id]);
+        const [receiver] = await connection.execute("UPDATE users SET balance = balance + ? WHERE users_id=?", [Number(amount), receiver_id]);
         if (receiver.affectedRows !== 1) {
             res.json({ success: false, message: 'Error adding balance.' });
         }
