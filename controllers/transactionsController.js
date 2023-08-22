@@ -82,8 +82,8 @@ exports.TransferAmount = async (req, res) => {
         const transaction_id = generateUniqueId({ length: 18, });
 
         const [row] = await connection.execute(
-            "INSERT INTO transactions(`transaction_id`,`sender_name`,`receiver_name`,`transaction_type`,`amount`,`transaction_fees`,`final_amount`,`note` ) VALUES(?,?,?,?,?,?,?,? )",
-            [transaction_id, rows[0].name, cols[0].name, transaction_type, amount, transaction_fees, final_amount, note]
+            "INSERT INTO transactions(`transaction_id`,`sender_name`,`receiver_name`,`transaction_type`,`amount`,`transaction_fees`,`final_amount`,`note`,`status` ) VALUES(?,?,?,?,?,?,?,?,?)",
+            [transaction_id, rows[0].name, cols[0].name, transaction_type, amount, transaction_fees, final_amount, note, 'success']
         );
 
         if (row.affectedRows === 1) {
