@@ -82,13 +82,13 @@ exports.TransferAmount = async (req, res) => {
         const transaction_id = generateUniqueId({ length: 18, });
 
         const [row] = await connection.execute(
-            "INSERT INTO transactions(`transaction_id`,`sender_name`,`receiver_name`,`transaction_type`,`amount`,`transaction_fees`,`final_amount`,`note`,`status` ) VALUES(?,?,?,?,?,?,?,?,?)",
+            "INSERT INTO transactions(`transaction_id`,`sender_name`,`receiver_name`,`transaction_type`,`amount`,`transaction_fees`,`final_amount`,`note`,`transaction_status` ) VALUES(?,?,?,?,?,?,?,?,?)",
             [transaction_id, rows[0].name, cols[0].name, transaction_type, amount, transaction_fees, final_amount, note, 'success']
         );
 
         if (row.affectedRows === 1) {
             const [col] = await connection.execute('select *  from transactions where id=?', [row.insertId]);
-            return res.json({ success: true, status: 'success', data: col[0] });
+            return res.json({ success: true, status: 'success', data: col[0], message: 'Successfully Transfer!', });
         } else {
             return res.json({ success: false, message: "Data Not Inserted Found !" });
         }
