@@ -43,8 +43,7 @@ var upload = multer({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.post("/upload",
-
+app.post("/",
     upload.fields([
         { name: 'Selfie_with_document', maxCount: 1 },
         { name: 'KYC_Front_Image', maxCount: 1 },
