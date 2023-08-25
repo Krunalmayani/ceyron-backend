@@ -5,7 +5,10 @@ var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
 const { getAllUsers, getUserById, updateUsers, deleteUsers, usersRegister, usersLogin, setSecurityPin, changePassword, getUserByUserId, } = require('../controllers/usersController');
+const multer = require('multer');
 
+var forms = multer();
+router.use(forms.array());
 router.use(cors());
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());

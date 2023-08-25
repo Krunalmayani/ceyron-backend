@@ -5,6 +5,9 @@ var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
 const { register, login, forgotPassword, changePassword, setNewPassword, updateGlobalSettings } = require('../controllers/adminController');
+const multer = require('multer');
+var forms = multer();
+router.use(forms.array());
 
 router.use(cors());
 router.use(bodyParser.urlencoded({ extended: false }));

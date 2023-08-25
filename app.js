@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require("cors");
-var multer = require('multer');
 
 const bodyParser = require('body-parser');
 
@@ -10,27 +9,31 @@ const agentsRoutes = require("./routes/agentsRoutes");
 const usersRoutes = require("./routes/usersRoutes");
 const transactionRoutes = require("./routes/transactionRoutes");
 const settingRoutes = require("./routes/settingRoutes");
-const { TransferAmount } = require('./controllers/transactionsController');
-const { verifyPin } = require('./controllers/settingController');
+const transferRoutes = require("./routes/transferRoutes");
+const verifyPinRoutes = require("./routes/verifyPinRoutes");
+const kycRoutes = require("./routes/kycRoutes")
 
 var app = express();
-var forms = multer();
 
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
-app.use(forms.array());
+app.use('/uploads', express.static('uploads'));
 
 
 // Routes
 app.use('/admin', adminRoutes);
 app.use('/agents', agentsRoutes);
+
 app.use('/users', usersRoutes);
 app.use('/transactions', transactionRoutes);
+
 app.use('/global', settingRoutes);
-app.post('/transfer', TransferAmount);
-app.post('/verify-pin', verifyPin)
+app.use('/kyc', kycRoutes);
+
+app.use('/transfer', transferRoutes);
+app.use('/verify-pin', verifyPinRoutes);
 
 app.get('/', function (req, res) {
     res.send('Hello World!');

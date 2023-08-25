@@ -4,8 +4,13 @@ const cors = require('cors');
 var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
+const multer = require('multer');
 const { setSecurityPin, changePassword, deleteUsers } = require('../controllers/usersController');
 const { agentsLogin, agentsRegister, updateAgents, getAllAgents, getAgentById, getAgentByUserId } = require('../controllers/agentsController');
+const { changeKycStatus } = require('../controllers/kycController');
+
+var forms = multer();
+router.use(forms.array());
 
 router.use(cors());
 router.use(bodyParser.urlencoded({ extended: false }));
@@ -84,6 +89,13 @@ router.post("/change-password", [
     body('confirm_password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
 ], changePassword);
 
+
+router.put('/kyc/:id', [
+    body('id', "ID is Required").notEmpty().escape().trim(),
+    body('agents_id', "Agents ID is Required").notEmpty().escape().trim(),
+    body('status', "Fill the Staus feild").notEmpty(),
+    body('email', "Invalid email address").notEmpty().escape().trim().isEmail(),
+], changeKycStatus);
 
 module.exports = router;
 
