@@ -31,8 +31,8 @@ exports.kycVerifyData = async (req, res) => {
             "INSERT INTO  kycdetails (`agents_id`,`name`,`email`,`dob`,`address`,`state`,`country`,`zipcode`,`selfie_with_document`,`front_document`,`back_document`) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
             [agents_id, full_name, email, new Date(dob), address, state, country, zip_code, selfie_with_document, front_document, back_document]
         );
-
-        if (rows.affectedRows === 1) {
+        const [col] = await connection.execute("UPDATE users SET kyc_status=?  WHERE users_id=?", ['pending', agents_id]);
+        if (rows.affectedRows === 1 && col.affectedRows === 1) {
             const [row] = await connection.execute('select * from kycdetails WHERE id=?', [rows?.insertId])
             return res.json({ success: true, status: 'success', message: 'kycdetails successfully Inserted !', data: row[0] })
         } else {
