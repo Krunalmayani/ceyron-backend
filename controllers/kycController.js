@@ -14,7 +14,7 @@ exports.kycVerifyData = async (req, res) => {
         return res.json({ success: false, message: 'Image is Not upload!' })
     }
 
-    const url = req.protocol + '://' + req.get('host') + '/uploads/'
+    const url = req.protocol + '://' + '3.96.147.37' + '/uploads/'
 
     const selfie_with_document = url + 'selfies_with_documents/' + req.files.Selfie_with_document[0].filename;
     const front_document = url + 'kyc_front_images/' + req.files.KYC_Front_Image[0].filename;
