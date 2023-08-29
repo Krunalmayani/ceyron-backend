@@ -201,7 +201,7 @@ exports.updateGlobalSettings = async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    const { id, transaction_limits, funding_limits, transaction_fees, fx_rates } = req.body;
+    const { id, transaction_limits, funding_limits, transaction_fees, fx_rates, agent_commission, admin_commision } = req.body;
     const token = req?.headers?.authorization?.split(" ")[1];
 
     try {
@@ -209,7 +209,10 @@ exports.updateGlobalSettings = async (req, res) => {
             return res.json({ success: false, message: "auth Token not found" });
         }
 
-        const [rows] = await connection.execute("UPDATE global_settings SET transaction_limits=?, funding_limits=?,fx_rates=?,transaction_fees=? WHERE id=?", [transaction_limits, funding_limits, fx_rates, transaction_fees, Number(id)])
+        const [rows] = await connection.execute(
+            "UPDATE global_settings SET transaction_limits=?, funding_limits=?,fx_rates=?,transaction_fees=?, admin_commision=?,agent_commission=? WHERE id=?",
+            [transaction_limits, funding_limits, fx_rates, transaction_fees, admin_commision, agent_commission, Number(id)]
+        )
 
         if (rows.affectedRows === 1) {
             const [row] = await connection.execute('select * from global_settings WHERE id=?', [Number(id)])
