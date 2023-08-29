@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { validationResult } = require("express-validator");
 const connection = require("../db").promise();
 
@@ -14,7 +15,7 @@ exports.kycVerifyData = async (req, res) => {
         return res.json({ success: false, message: 'Image is Not upload!' })
     }
 
-    const url = req.protocol + '://' + '3.96.147.37' + '/uploads/'
+    const url = req.protocol + '://' + process.env.IP_PORT + '/uploads/'
 
     const selfie_with_document = url + 'selfies_with_documents/' + req.files.Selfie_with_document[0].filename;
     const front_document = url + 'kyc_front_images/' + req.files.KYC_Front_Image[0].filename;
@@ -32,6 +33,7 @@ exports.kycVerifyData = async (req, res) => {
             [agents_id, full_name, email, new Date(dob), address, state, country, zip_code, selfie_with_document, front_document, back_document]
         );
         const [col] = await connection.execute("UPDATE users SET kyc_status=?  WHERE users_id=?", ['pending', agents_id]);
+
         if (rows.affectedRows === 1 && col.affectedRows === 1) {
             const [row] = await connection.execute('select * from kycdetails WHERE id=?', [rows?.insertId])
             return res.json({ success: true, status: 'success', message: 'kycdetails successfully Inserted !', data: row[0] })
