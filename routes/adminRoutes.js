@@ -4,7 +4,7 @@ const cors = require('cors');
 var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
-const { register, login, forgotPassword, changePassword, setNewPassword, updateGlobalSettings } = require('../controllers/adminController');
+const { register, login, forgotPassword, changePassword, setNewPassword, updateGlobalSettings, TransferAmountToAgent } = require('../controllers/adminController');
 const multer = require('multer');
 var forms = multer();
 router.use(forms.array());
@@ -58,6 +58,17 @@ router.put('/update-setting', [
         .isDecimal().withMessage('Transaction fees must be a decimal number')
         .isFloat({ gt: -1 }).withMessage('Transaction fees must be a non-negative number'),
 
-], updateGlobalSettings)
+], updateGlobalSettings);
+
+router.post('/transfer',
+    [
+        body('sender_id', "Sender ID is Required").notEmpty().escape().trim(),
+        body('receiver_id', "ReceiverID is Required").notEmpty().escape().trim(),
+        body('transaction_type', 'Invalid transaction type').notEmpty().escape().trim(),
+        body('amount').isFloat({ min: 0 }).withMessage('Amount must be a positive number'),
+    ]
+    , TransferAmountToAgent);
+
+
 
 module.exports = router;

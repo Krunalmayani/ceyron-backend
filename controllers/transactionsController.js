@@ -101,8 +101,9 @@ exports.TransferAmount = async (req, res) => {
             } else {
                 return res.json({ success: false, message: "Data Not Inserted Found !" });
             }
+        } else {
+            return res.json({ success: false, message: "Sender is not Agent OR Receiver is not User !" });
         }
-
     } catch (error) {
         return res.json({ success: false, error })
     }
