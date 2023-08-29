@@ -53,9 +53,11 @@ exports.TransferAmount = async (req, res) => {
         if (senderRole.length === 0) {
             return res.json({ success: false, message: "Sender ID is invalid !", });
         }
+
         if (receiverRole.length === 0) {
             return res.json({ success: false, message: "Receiver ID is invalid !", });
         }
+
         const sender_balance = senderRole[0].balance;
         const adminCommission = (Number(amount) * Number(settings[0].admin_commision)) / 100; // Example: 1% fee
         const agentCommission = (Number(amount) * Number(settings[0].agent_commission)) / 100;// Example: 1% fee
@@ -87,6 +89,7 @@ exports.TransferAmount = async (req, res) => {
             }
 
             const transaction_id = generateUniqueId({ length: 18, });
+
             const [row] = await connection.execute(
                 "INSERT INTO transactions(`transaction_id`,`sender_id`,`receiver_id`,`transaction_type`,`amount`,`transaction_fees`,`final_amount`,`note`,`amount_to_collect`,`transaction_status` ) VALUES(?,?,?,?,?,?,?,?,?,?)",
                 [transaction_id, sender_id, receiver_id, transaction_type, amount, adminCommission, final_amount, note, collectAmount, 'success']
@@ -99,6 +102,7 @@ exports.TransferAmount = async (req, res) => {
                 return res.json({ success: false, message: "Data Not Inserted Found !" });
             }
         }
+
     } catch (error) {
         return res.json({ success: false, error })
     }
