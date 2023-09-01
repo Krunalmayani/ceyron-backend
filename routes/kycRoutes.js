@@ -3,7 +3,7 @@ const app = express()
 const multer = require('multer')
 const path = require('path')
 const cors = require("cors");
-const { kycVerifyData, getKycData, getKycDataBYID } = require("../controllers/kycController");
+const { kycVerifyData, getKycData, getKycDataBYID, deleteKYC } = require("../controllers/kycController");
 const { body } = require('express-validator');
 
 
@@ -61,6 +61,6 @@ app.post("/",
 
 app.get('/', getKycData);
 app.get('/:id', getKycDataBYID);
-
+app.delete("/:id", deleteKYC);
 
 module.exports = app;

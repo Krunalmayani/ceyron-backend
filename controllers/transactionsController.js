@@ -39,7 +39,7 @@ exports.TransferAmount = async (req, res) => {
         return res.status(422).json({ errors: errors.array() });
     }
 
-    const { sender_id, receiver_id, amount, transaction_type, final_amount, note, amount_to_collect } = req.body;
+    const { sender_id, receiver_id, amount, transaction_type, final_amount, note, amount_to_collect, admin_charge, agent_charge } = req.body;
     const token = req?.headers?.authorization?.split(" ")[1];
     try {
         if (!token) {
@@ -59,10 +59,10 @@ exports.TransferAmount = async (req, res) => {
         }
 
         const sender_balance = senderRole[0].balance;
-        const adminCommission = (Number(amount) * Number(settings[0].admin_commision)) / 100; // Example: 1% fee
-        const agentCommission = (Number(amount) * Number(settings[0].agent_commission)) / 100;// Example: 1% fee
-        const netAmount = Number(amount) + adminCommission;
-        const collectAmount = agentCommission + adminCommission + Number(amount);
+        const adminCharge = (Number(amount) * Number(settings[0].admin_charge)) / 100; // Example: 1% fee
+        const agentCharge = (Number(amount) * Number(settings[0].agent_charge)) / 100;// Example: 1% fee
+        const netAmount = Number(amount) + adminCharge;
+        const collectAmount = agentCharge + adminCharge + Number(amount);
 
         if (netAmount !== Number(final_amount)) {
             return res.json({ success: false, message: "Final Amount is Mismatched  !", });
@@ -91,12 +91,12 @@ exports.TransferAmount = async (req, res) => {
             const transaction_id = generateUniqueId({ length: 18, });
 
             const [row] = await connection.execute(
-                "INSERT INTO transactions(`transaction_id`,`sender_id`,`receiver_id`,`transaction_type`,`amount`,`transaction_fees`,`final_amount`,`note`,`amount_to_collect`,`transaction_status` ) VALUES(?,?,?,?,?,?,?,?,?,?)",
-                [transaction_id, sender_id, receiver_id, transaction_type, amount, adminCommission, final_amount, note, collectAmount, 'success']
+                "INSERT INTO transactions(`transaction_id`,`sender_id`,`receiver_id`,`transaction_type`,`amount`, `final_amount`,`note`,`amount_to_collect`,`transaction_status`,`agent_charge`,`admin_charge` ) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                [transaction_id, sender_id, receiver_id, transaction_type, amount, final_amount, note, collectAmount, 'success', admin_charge, agent_charge]
             );
 
             if (row.affectedRows === 1) {
-                const [col] = await connection.execute('SELECT t.id,t.transaction_id,t.sender_id,sender.name AS sender_name,t.receiver_id,receiver.name AS receiver_name,t.transaction_type, t.amount,t.transaction_fees, t.transaction_date, t.final_amount, t.amount_to_collect,t.transaction_status,t.note FROM transactions t INNER JOIN users sender on t.sender_id = sender.users_id INNER JOIN users receiver ON t.receiver_id = receiver.users_id where t.id=?', [row.insertId]);
+                const [col] = await connection.execute('SELECT t.id,t.transaction_id,t.sender_id,sender.name AS sender_name,t.receiver_id,receiver.name AS receiver_name,t.transaction_type, t.amount,t.transaction_fees, t.transaction_date, t.final_amount, t.amount_to_collect,t.admin_charge,t.agent_charge,t.transaction_status,t.note FROM transactions t INNER JOIN users sender on t.sender_id = sender.users_id INNER JOIN users receiver ON t.receiver_id = receiver.users_id where t.id=?', [row.insertId]);
                 return res.json({ success: true, status: 'success', data: col[0], message: 'Successfully Transfer!', });
             } else {
                 return res.json({ success: false, message: "Data Not Inserted Found !" });

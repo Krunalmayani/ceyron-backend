@@ -45,18 +45,12 @@ router.post('/change-password', [
 
 router.put('/update-setting', [
     body('id', "ID is Required").notEmpty().escape().trim(),
-    body('transaction_limits')
-        .isDecimal().withMessage('Transaction limits must be a decimal number')
-        .isFloat({ gt: 0 }).withMessage('Transaction limits must be a positive number'),
-    body('funding_limits')
-        .isDecimal().withMessage('Funding limits must be a decimal number')
-        .isFloat({ gt: 0 }).withMessage('Funding limits must be a positive number'),
-    body('fx_rates')
-        .isDecimal().withMessage('FX rates must be a decimal number')
-        .isFloat({ gt: 0 }).withMessage('FX rates must be a positive number'),
-    body('transaction_fees')
-        .isDecimal().withMessage('Transaction fees must be a decimal number')
-        .isFloat({ gt: -1 }).withMessage('Transaction fees must be a non-negative number'),
+    body('admin_charged')
+        .isDecimal().withMessage('Admin Charge must be a decimal number')
+        .isFloat({ gt: -1 }).withMessage('Admin Charge must be a non-negative number'),
+    body('agent_charged')
+        .isDecimal().withMessage('Agent Charge must be a decimal number')
+        .isFloat({ gt: -1 }).withMessage('Agent Charge must be a non-negative number'),
 
 ], updateGlobalSettings);
 

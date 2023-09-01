@@ -130,3 +130,29 @@ exports.changeKycStatus = async (req, res) => {
         return res.json({ success: false, message: error });
     }
 }
+
+exports.deleteKYC = async (req,res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
+    const { id } = req.params;
+    const token = req?.headers?.authorization?.split(" ")[1];
+    try {
+        if (!token) {
+            return res.json({ success: false, message: "auth Token not found" });
+        }
+        const [rows] = await connection.execute("DELETE FROM kycdetails WHERE id=?", [id])
+
+        if (rows.affectedRows === 1) {
+
+            return res.json({ success: true, status: "success", message: 'KYC successfully Delete !', data: id })
+        } else {
+            return res.json({ success: false, message: 'KYC Not Delete or User Not Found !' })
+        }
+    } catch (error) {
+        return res.json({ success: false, error })
+    }
+}

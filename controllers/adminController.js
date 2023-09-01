@@ -5,7 +5,6 @@ const generateToken = require("../untils/generateToken");
 const generateUniqueId = require("generate-unique-id");
 
 
-
 exports.register = async (req, res) => {
     const errors = validationResult(req);
 
@@ -201,7 +200,8 @@ exports.updateGlobalSettings = async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-    const { id, transaction_limits, funding_limits, transaction_fees, fx_rates, agent_commission, admin_commision } = req.body;
+
+    const { id, agent_charged, admin_charged } = req.body;
     const token = req?.headers?.authorization?.split(" ")[1];
 
     try {
@@ -210,8 +210,8 @@ exports.updateGlobalSettings = async (req, res) => {
         }
 
         const [rows] = await connection.execute(
-            "UPDATE global_settings SET transaction_limits=?, funding_limits=?,fx_rates=?,transaction_fees=?, admin_commision=?,agent_commission=? WHERE id=?",
-            [transaction_limits, funding_limits, fx_rates, transaction_fees, admin_commision, agent_commission, Number(id)]
+            "UPDATE global_settings SET admin_charge=?,agent_charge=? WHERE id=?",
+            [admin_charged, agent_charged, Number(id)]
         )
 
         if (rows.affectedRows === 1) {
