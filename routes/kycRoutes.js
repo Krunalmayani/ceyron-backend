@@ -3,7 +3,7 @@ const app = express()
 const multer = require('multer')
 const path = require('path')
 const cors = require("cors");
-const { kycVerifyData, getKycData, getKycDataBYID, deleteKYC } = require("../controllers/kycController");
+const { kycVerifyData, getKycData, getKycDataBYID, deleteKYC, getAgentKycData, getUserKycData } = require("../controllers/kycController");
 const { body } = require('express-validator');
 
 
@@ -52,7 +52,17 @@ app.post("/",
     body('agents_id').notEmpty().withMessage('ID is required'),
     body('full_name').notEmpty().withMessage('Full name is required'),
     body('email').isEmail().withMessage('Invalid email format'),
-    body('dob').isDate().withMessage('Invalid date format'),
+    body('dob').isDate().withMessage('Invalid date format').custom((value) => {
+        const dateOfBirth = new Date(value);
+        const currentDate = new Date();
+        // Calculate the difference in years
+        const ageDifferenceInYears = currentDate.getFullYear() - dateOfBirth.getFullYear();
+        // Check if the age is at least 18
+        if (ageDifferenceInYears < 18)
+            throw new Error('You must be at least 18 years old.');
+
+        return true; // Validation passed
+    }),
     body('address').notEmpty().withMessage('Address is required'),
     body('state').notEmpty().withMessage('State is required'),
     body('country').notEmpty().withMessage('Country is required'),
@@ -60,6 +70,8 @@ app.post("/",
 ], kycVerifyData);
 
 app.get('/', getKycData);
+app.get('/agent', getAgentKycData);
+app.get('/user', getUserKycData);
 app.get('/:id', getKycDataBYID);
 app.delete("/:id", deleteKYC);
 
