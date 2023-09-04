@@ -18,7 +18,7 @@ exports.getAllTransactions = async (req, res) => {
             return res.json({ success: false, message: "auth Token not found" });
         } else {
 
-            const [row] = await connection.execute("SELECT t.id,t.transaction_id,t.sender_id,sender.name AS sender_name,t.receiver_id,receiver.name AS receiver_name,t.transaction_type, t.amount, t.transaction_date, t.final_amount, t.amount_to_collect,t.transaction_status,t.admin_charge,t.agent_charge,t.note FROM transactions t INNER JOIN users sender on t.sender_id = sender.users_id INNER JOIN users receiver ON t.receiver_id = receiver.users_id")
+            const [row] = await connection.execute("SELECT t.id,t.transaction_id,t.sender_id,sender.name AS sender_name,sender.role AS sender_role, t.receiver_id,receiver.name AS receiver_name, receiver.role AS receiver_role,t.transaction_type, t.amount, t.transaction_date, t.final_amount, t.amount_to_collect,t.transaction_status,t.admin_charge,t.agent_charge,t.note FROM transactions t INNER JOIN users sender on t.sender_id = sender.users_id INNER JOIN users receiver ON t.receiver_id = receiver.users_id")
 
             if (row.length > 0) {
                 return res.json({ data: row, success: true, status: 'success' })
