@@ -201,7 +201,8 @@ exports.updateGlobalSettings = async (req, res) => {
         return res.status(422).json({ errors: errors.array() });
     }
 
-    const { id, agent_charged, admin_charged } = req.body;
+    const { id, agent_charged, admin_charged, charge_type } = req.body;
+
     const token = req?.headers?.authorization?.split(" ")[1];
 
     try {
@@ -209,15 +210,27 @@ exports.updateGlobalSettings = async (req, res) => {
             return res.json({ success: false, message: "auth Token not found" });
         }
 
-        const [rows] = await connection.execute(
-            "UPDATE global_settings SET admin_charge=?,agent_charge=? WHERE id=?",
-            [admin_charged, agent_charged, Number(id)]
-        )
+        let query;
+        if (charge_type === 'agent_to_user') {
+            query = "UPDATE global_settings SET admin_charge=?,agent_charge=? WHERE  charge_type=?";
+
+        } else if (charge_type === 'user_to_agent') {
+            query = "UPDATE global_settings SET admin_charge=?,agent_charge=? WHERE  charge_type=?";
+
+        } else if (charge_type === 'user_to_user') {
+            query = "UPDATE global_settings SET admin_charge=?,agent_charge=? WHERE   charge_type=?";
+
+        } else {
+            query = "UPDATE global_settings SET admin_charge=?,agent_charge=? WHERE   charge_type=?";
+
+        }
+
+        const [rows] = await connection.execute(query, [admin_charged, agent_charged, charge_type])
 
         if (rows.affectedRows === 1) {
-            const [row] = await connection.execute('select * from global_settings WHERE id=?', [Number(id)])
+            const [row] = await connection.execute('select * from global_settings')
 
-            return res.json({ success: true, status: "success", message: 'Settings successfully Update !', data: row[0] })
+            return res.json({ success: true, status: "success", message: 'Settings successfully Update !', data: row })
         } else {
             return res.json({ success: false, message: 'Not update Settings !' })
         }

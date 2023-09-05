@@ -17,9 +17,35 @@ exports.globalSettings = async (req, res) => {
         const [row] = await connection.execute('select * from global_settings')
 
         if (row.length > 0) {
+            return res.json({ data: row, success: true, status: "success", })
+        } else {
+            return res.json({ success: false, message: "Date Not Found !" });
+        }
+
+    } catch (error) {
+        return res.json({ success: false, error })
+    }
+}
+
+exports.UserAgentChargeSettings = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+    const { charge_type } = req.query;
+    const token = req?.headers?.authorization?.split(" ")[1];
+    try {
+        if (!token) {
+            return res.json({ success: false, message: "auth Token not found" });
+        }
+
+        const [row] = await connection.execute('select * from global_settings where charge_type=?', [charge_type])
+
+        if (row.length > 0) {
             return res.json({ data: row[0], success: true, status: "success", })
         } else {
-            return res.json({ success: false, message: "Unauthorized accress !" });
+            return res.json({ success: false, message: "Date Not Found !" });
         }
 
     } catch (error) {
