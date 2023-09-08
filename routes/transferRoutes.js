@@ -21,6 +21,14 @@ router.post('/',
         body('amount').isFloat({ min: 0 }).withMessage('Amount must be a positive number'),
         body('final_amount').isFloat({ min: 0 }).withMessage('Final amount must be a positive number'),
         body('amount_to_collect').isFloat({ min: 0 }).withMessage('Amount to collect must be a positive number'),
+        body('admin_charge')
+            .isDecimal().withMessage('Admin Charge must be a decimal number')
+            .isFloat({ gt: -1 }).withMessage('Admin Charge must be a non-negative number'),
+        body('agent_charge')
+            .isDecimal().withMessage('Agent Charge must be a decimal number')
+            .isFloat({ gt: -1 }).withMessage('Agent Charge must be a non-negative number'),
+        body('debit_amount', 'User Debited Amount Required')
+            .isFloat({ min: 0 }).withMessage('User Debited Amount must be a positive number'),
     ]
     , TransferAmount);
 
