@@ -50,6 +50,16 @@ exports.TransferAmount = async (req, res) => {
         const [receiverRole] = await connection.execute('select * from users where users_id=?', [receiver_id]);
         const [settings] = await connection.execute('select * from global_settings where charge_type=?', [transaction_type]);
 
+        if (settings.length === 0) {
+            return res.json({ success: false, message: "Transaction Type is not valid... !" });
+        }
+        if (settings[0].admin_charge === admin_charge) {
+            return res.json({ success: false, message: "Admin Commission is not valid... !" });
+        }
+        if (settings[0].agent_charge === agent_charge) {
+            return res.json({ success: false, message: "Agent Fees  not valid... !" });
+        }
+
         if (senderRole.length === 0) {
             return res.json({ success: false, message: "Sender ID is invalid !", });
         }
@@ -159,6 +169,45 @@ exports.TransferAmount = async (req, res) => {
             } else {
                 return res.json({ success: false, message: "Sender is not User OR Receiver is not Agent !" });
             }
+        } else if (transaction_type === 'user_to_user') {
+            if (senderRole[0].role === 'User' && receiverRole[0].role === "User") {
+
+                // user to user transfer charges
+                const userdebited = Number(amount) + adminCharge;
+
+                if (userdebited !== Number(final_amount)) {
+                    return res.json({ success: false, message: "Final Transfer Amount is Mismatched  !", });
+                }
+                const [sender] = await connection.execute(sender_query, [userdebited, sender_id]);
+
+                if (sender.affectedRows !== 1) {
+                    res.json({ success: false, message: 'Error deducting balance.' });
+                }
+
+                const [receiver] = await connection.execute(receiver_query, [userdebited, receiver_id]);
+                if (receiver.affectedRows !== 1) {
+                    res.json({ success: false, message: 'Error adding balance.' });
+                }
+
+                const transaction_id = generateUniqueId({ length: 18, });
+                const [row] = await connection.execute(
+                    insert_query,
+                    [transaction_id, sender_id, receiver_id, transaction_type, userdebited, userdebited, note, 0, 'success', 0, settings[0].admin_charge, 0]
+                );
+
+                if (row.affectedRows === 1) {
+                    const [col] = await connection.execute(select_query, [row.insertId]);
+                    return res.json({ success: true, status: 'success', data: col[0], message: 'Successfully Transfer!', });
+                } else {
+                    return res.json({ success: false, message: "Data Not Inserted Found !" });
+                }
+            }
+            else {
+                return res.json({ success: false, message: "Sender OR Receiver is not User !" });
+            }
+
+        } else {
+            return res.json({ success: false, message: "Transaction Type is not valid !" });
         }
 
     } catch (error) {
