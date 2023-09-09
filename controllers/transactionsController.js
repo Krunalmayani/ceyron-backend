@@ -53,10 +53,10 @@ exports.TransferAmount = async (req, res) => {
         if (settings.length === 0) {
             return res.json({ success: false, message: "Transaction Type is not valid... !" });
         }
-        if (settings[0].admin_charge === admin_charge) {
+        if (settings[0].admin_charge !== admin_charge) {
             return res.json({ success: false, message: "Admin Commission is not valid... !" });
         }
-        if (settings[0].agent_charge === agent_charge) {
+        if (settings[0].agent_charge !== agent_charge) {
             return res.json({ success: false, message: "Agent Fees  not valid... !" });
         }
 
