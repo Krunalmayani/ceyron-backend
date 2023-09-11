@@ -192,7 +192,7 @@ exports.TransferAmount = async (req, res) => {
                 const transaction_id = generateUniqueId({ length: 18, });
                 const [row] = await connection.execute(
                     insert_query,
-                    [transaction_id, sender_id, receiver_id, transaction_type, userdebited, userdebited, note, 0, 'success', 0, settings[0].admin_charge, 0]
+                    [transaction_id, sender_id, receiver_id, transaction_type, Number(amount), userdebited, note, 0, 'success', 0, settings[0].admin_charge, 0]
                 );
 
                 if (row.affectedRows === 1) {
