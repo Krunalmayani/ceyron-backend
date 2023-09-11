@@ -15,7 +15,7 @@ router.use(bodyParser.json());
 
 router.get("/", getAllUsers);
 router.get('/:id', getUserById);
-router.get('/users_id/:users_id', getUserByUserId);
+router.get('/id/:users_id', getUserByUserId);
 
 router.post("/register", [
     body('name', 'Name is required').trim().notEmpty().isString().withMessage('Name must be a string')

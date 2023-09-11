@@ -31,15 +31,13 @@ router.post('/login', [
 
 router.post("/register", [
     body('name', 'Name is required').trim().notEmpty().isString().withMessage('Name must be a string')
-        .isLength({ min: 3 }).withMessage('Name must be at least 3 characters')
-        .matches(/^[a-zA-Z\s]+$/).withMessage('Name can only contain letters and spaces'),
+        .isLength({ min: 3 }).withMessage('Name must be at least 3 characters'),
 
     body('business_name', 'Business Name is required').trim().notEmpty().isString().withMessage('Business Name must be a string')
         .isLength({ min: 3 }).withMessage('Business Name must be at least 3 characters'),
 
     body('branch_name', 'Branch Name is required').trim().notEmpty().isString().withMessage('Branch Name must be a string')
-        .isLength({ min: 3 }).withMessage('Branch Name must be at least 3 characters')
-        .matches(/^[a-zA-Z\s]+$/).withMessage('Branch Name can only contain letters and spaces'),
+        .isLength({ min: 3 }).withMessage('Branch Name must be at least 3 characters'),
 
     body('email', "Invalid email address").notEmpty().escape().trim().isEmail(),
 
@@ -56,14 +54,12 @@ router.post("/register", [
 router.put("/:id", [
 
     body('name', 'Name is required').trim().notEmpty().isString().withMessage('Name must be a string')
-        .isLength({ min: 3 }).withMessage('Name must be at least 3 characters')
-        .matches(/^[a-zA-Z\s]+$/).withMessage('Name can only contain letters and spaces'),
+        .isLength({ min: 3 }).withMessage('Name must be at least 3 characters'),
     body('business_name', 'Business Name is required').trim().notEmpty().isString().withMessage('Business Name must be a string')
         .isLength({ min: 3 }).withMessage('Business Name must be at least 3 characters'),
 
     body('branch_name', 'Branch Name is required').trim().notEmpty().isString().withMessage('Name must be a string')
-        .isLength({ min: 3 }).withMessage('Name must be at least 3 characters')
-        .matches(/^[a-zA-Z\s]+$/).withMessage('Name can only contain letters and spaces'),
+        .isLength({ min: 3 }).withMessage('Name must be at least 3 characters'),
 
     body('email', "Invalid email address").notEmpty().escape().trim().isEmail(),
 
@@ -92,7 +88,7 @@ router.post("/change-password", [
 
 router.put('/kyc/:id', [
     body('id', "ID is Required").notEmpty().escape().trim(),
-    body('agents_id', "Agents ID is Required").notEmpty().escape().trim(),
+    body('users_id', "Users ID is Required").notEmpty().escape().trim(),
     body('status', "Fill the Staus feild").notEmpty(),
     body('email', "Invalid email address").notEmpty().escape().trim().isEmail(),
 ], changeKycStatus);
