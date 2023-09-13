@@ -184,7 +184,7 @@ exports.TransferAmount = async (req, res) => {
                     res.json({ success: false, message: 'Error deducting balance.' });
                 }
 
-                const [receiver] = await connection.execute(receiver_query, [userdebited, receiver_id]);
+                const [receiver] = await connection.execute(receiver_query, [amount, receiver_id]);
                 if (receiver.affectedRows !== 1) {
                     res.json({ success: false, message: 'Error adding balance.' });
                 }
