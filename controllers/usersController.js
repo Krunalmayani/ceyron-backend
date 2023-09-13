@@ -266,6 +266,48 @@ exports.setSecurityPin = async (req, res) => {
     }
 }
 
+exports.changeSecurityPin = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+    const { id, old_security_pin, security_pin, confirm_security_pin } = req.body;
+    const token = req?.headers?.authorization?.split(" ")[1];
+    try {
+        if (!token) {
+            return res.json({ success: false, message: "auth Token not found" });
+        }
+
+        if (security_pin !== confirm_security_pin) {
+            return res.json({ success: false, message: "Security Pin and Confirm Security Pin are not same!" });
+        }
+        const [row] = await connection.execute("SELECT * FROM users WHERE id=?", [id]);
+
+
+        if (row.length > 0) {
+
+            if (row[0].security_pin !== old_security_pin) {
+                return res.json({ success: false, message: "Old Pin is wrong !" });
+            }
+
+            const [rows] = await connection.execute("UPDATE users SET security_pin=? WHERE id=?", [security_pin, id]);
+            if (rows.affectedRows === 1) {
+                const [row] = await connection.execute('select * from users WHERE id=?', [id])
+
+                return res.json({ success: true, status: "success", message: 'Pin successfully Change!', data: row[0] })
+            } else {
+                return res.json({ success: false, message: 'Pin is Not Set!' })
+            }
+        } else {
+            return res.json({ success: false, message: 'Data Not Found !!' })
+        }
+
+    } catch (error) {
+        return res.json({ success: false, message: error.message });
+    }
+}
+
 exports.changePassword = async (req, res) => {
     const errors = validationResult(req);
 

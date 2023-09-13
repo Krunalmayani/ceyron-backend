@@ -163,7 +163,7 @@ exports.changeKycStatus = async (req, res) => {
         return res.status(422).json({ errors: errors.array() });
     }
 
-    const { email, status, agents_id } = req.body;
+    const { email, status, users_id } = req.body;
     const { id, } = req.params;
 
     const token = req?.headers?.authorization?.split(" ")[1];
@@ -172,10 +172,11 @@ exports.changeKycStatus = async (req, res) => {
             return res.json({ success: false, status: 'error', message: "auth Token not found" });
         }
 
-        const [rows] = await connection.execute("UPDATE kycdetails SET status = ?, email = ? WHERE id = ? AND agents_id = ?", [status, email, id, agents_id]);
+        const [rows] = await connection.execute("UPDATE kycdetails SET status = ?, email = ? WHERE id = ? AND agents_id = ?", [status, email, id, users_id]);
 
-        if (rows.affectedRows === 1) {
-            const [row] = await connection.execute('select * from kycdetails WHERE id=? AND agents_id = ?', [Number(id), agents_id])
+        const [cols] = await connection.execute("UPDATE users SET kyc_status = ?   WHERE  users_id = ?", [status, users_id]);
+        if (rows.affectedRows === 1 && cols.affectedRows === 1) {
+            const [row] = await connection.execute('select * from kycdetails WHERE id=? AND agents_id = ?', [Number(id), users_id])
 
             return res.json({ success: true, status: 'success', message: 'Status successfully Updated !', data: row[0] })
         } else {

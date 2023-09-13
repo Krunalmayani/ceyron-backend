@@ -5,7 +5,7 @@ var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
 const multer = require('multer');
-const { setSecurityPin, changePassword, deleteUsers } = require('../controllers/usersController');
+const { setSecurityPin, changePassword, deleteUsers, changeSecurityPin } = require('../controllers/usersController');
 const { agentsLogin, agentsRegister, updateAgents, getAllAgents, getAgentById, getAgentByUserId } = require('../controllers/agentsController');
 const { changeKycStatus } = require('../controllers/kycController');
 
@@ -77,6 +77,16 @@ router.post("/set-pin", [
     body('confirm_security_pin', "Confirm Security Pin is Required").notEmpty().escape().trim()
         .isNumeric().withMessage('Security pin must be numeric').isLength({ min: 4, max: 4 }).withMessage('Security pin must be 4 digits'),
 ], setSecurityPin);
+
+router.post("/change-pin", [
+    body('id', "ID is Required").notEmpty().escape().trim(),
+    body('old_security_pin', "Old Security Pin is Required").notEmpty().escape().trim()
+        .isNumeric().withMessage('Old Security pin must be numeric').isLength({ min: 4, max: 4 }).withMessage('Old Security pin must be 4 digits'),
+    body('security_pin', "Security Pin is Required").notEmpty().escape().trim()
+        .isNumeric().withMessage('Security pin must be numeric').isLength({ min: 4, max: 4 }).withMessage('Security pin must be 4 digits'),
+    body('confirm_security_pin', "Confirm Security Pin is Required").notEmpty().escape().trim()
+        .isNumeric().withMessage('Security pin must be numeric').isLength({ min: 4, max: 4 }).withMessage('Confirm Security pin must be 4 digits'),
+], changeSecurityPin);
 
 router.post("/change-password", [
     body('id', "Agents ID is Required").notEmpty().escape().trim(),

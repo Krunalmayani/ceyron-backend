@@ -4,7 +4,7 @@ const cors = require('cors');
 var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
-const { getAllUsers, getUserById, updateUsers, deleteUsers, usersRegister, usersLogin, setSecurityPin, changePassword, getUserByUserId, } = require('../controllers/usersController');
+const { getAllUsers, getUserById, updateUsers, deleteUsers, usersRegister, usersLogin, setSecurityPin, changePassword, getUserByUserId, changeSecurityPin, } = require('../controllers/usersController');
 const multer = require('multer');
 
 var forms = multer();
@@ -52,6 +52,16 @@ router.post("/set-pin", [
     body('confirm_security_pin', "Confirm Security Pin is Required").notEmpty().escape().trim()
         .isNumeric().withMessage('Security pin must be numeric').isLength({ min: 4, max: 4 }).withMessage('Security pin must be 4 digits'),
 ], setSecurityPin);
+
+router.post("/change-pin", [
+    body('id', "ID is Required").notEmpty().escape().trim(),
+    body('old_security_pin', "Old Security Pin is Required").notEmpty().escape().trim()
+        .isNumeric().withMessage('Old Security pin must be numeric').isLength({ min: 4, max: 4 }).withMessage('Old Security pin must be 4 digits'),
+    body('security_pin', "Security Pin is Required").notEmpty().escape().trim()
+        .isNumeric().withMessage('Security pin must be numeric').isLength({ min: 4, max: 4 }).withMessage('Security pin must be 4 digits'),
+    body('confirm_security_pin', "Confirm Security Pin is Required").notEmpty().escape().trim()
+        .isNumeric().withMessage('Security pin must be numeric').isLength({ min: 4, max: 4 }).withMessage('Confirm Security pin must be 4 digits'),
+], changeSecurityPin);
 
 router.post("/change-password", [
     body('id', "ID is Required").notEmpty().escape().trim(),
