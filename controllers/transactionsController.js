@@ -38,9 +38,9 @@ exports.TransferAmount = async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
-
     const { sender_id, receiver_id, amount, transaction_type, note, final_amount, amount_to_collect, admin_charge, agent_charge, debit_amount } = req.body;
     const token = req?.headers?.authorization?.split(" ")[1];
+
     try {
         if (!token) {
             return res.json({ success: false, message: "auth Token not found" });
@@ -78,22 +78,56 @@ exports.TransferAmount = async (req, res) => {
         let select_query = "SELECT t.id,t.transaction_id,t.sender_id,sender.name AS sender_name,t.receiver_id,receiver.name AS receiver_name,t.transaction_type, t.amount,t.transaction_fees, t.transaction_date, t.final_amount, t.amount_to_collect,t.admin_charge,t.agent_charge,t.transaction_status,t.note,t.debit_amount FROM transactions t INNER JOIN users sender on t.sender_id = sender.users_id INNER JOIN users receiver ON t.receiver_id = receiver.users_id where t.id=?";
         let insert_query = "INSERT INTO transactions(`transaction_id`,`sender_id`,`receiver_id`,`transaction_type`,`amount`, `final_amount`,`note`,`amount_to_collect`,`transaction_status`,`agent_charge`,`admin_charge`,`debit_amount` ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
 
+        if (transaction_type === 'agent_to_agent') {
+            if (senderRole[0].role === 'Agent' && receiverRole[0].role === "Agent") {
+                const agentdebited = Number(amount) + adminCharge;
+                // user to user transfer charges
 
-        if (transaction_type === 'agent_to_user') {
+                if (agentdebited.toFixed(2) !== Number(final_amount.toFixed(2))) {
+                    return res.json({ success: false, message: "Final Transfer Amount is Mismatched  !", });
+                }
+                const [sender] = await connection.execute(sender_query, [agentdebited, sender_id]);
+
+                if (sender.affectedRows !== 1) {
+                    res.json({ success: false, message: 'Error deducting balance.' });
+                }
+
+                const [receiver] = await connection.execute(receiver_query, [Number(amount), receiver_id]);
+                if (receiver.affectedRows !== 1) {
+                    res.json({ success: false, message: 'Error adding balance.' });
+                }
+
+                const transaction_id = generateUniqueId({ length: 18, });
+                const [row] = await connection.execute(
+                    insert_query,
+                    [transaction_id, sender_id, receiver_id, transaction_type, Number(amount), agentdebited, note, 0, 'success', 0, settings[0].admin_charge, 0]
+                );
+
+                if (row.affectedRows === 1) {
+                    const [col] = await connection.execute(select_query, [row.insertId]);
+                    return res.json({ success: true, status: 'success', data: col[0], message: 'Successfully Transfer!', });
+                } else {
+                    return res.json({ success: false, message: "Data Not Inserted Found !" });
+                }
+            }
+            else {
+                return res.json({ success: false, message: "Sender OR Receiver is not Agent !" });
+            }
+        } else if (transaction_type === 'agent_to_user') {
             if (senderRole[0].role === 'Agent' && receiverRole[0].role === "User") {
                 // aget to user transfer charges
                 const agentdebited = Number(amount) + adminCharge;
                 const agentCollectAmount = agentCharge + adminCharge + Number(amount);
 
-                if (agentdebited !== Number(final_amount)) {
+                if (agentdebited.toFixed(2) !== Number(final_amount.toFixed(2))) {
                     return res.json({ success: false, message: "Final Amount is Mismatched  !", });
                 }
 
-                if (sender_balance < agentdebited) {
+                if (Number(sender_balance.toFixed(2)) < agentdebited.toFixed(2)) {
                     return res.json({ success: false, message: "Insufficient balance. !", });
                 }
 
-                if (Number(amount_to_collect) !== Number(agentCollectAmount)) {
+                if (Number(amount_to_collect.toFixed(2)) !== Number(agentCollectAmount.toFixed(2))) {
                     return res.json({ success: false, message: "Mismatch amount to be collect", });
                 }
 
@@ -111,7 +145,7 @@ exports.TransferAmount = async (req, res) => {
                 const transaction_id = generateUniqueId({ length: 18, });
                 const [row] = await connection.execute(
                     insert_query,
-                    [transaction_id, sender_id, receiver_id, transaction_type, amount, agentdebited, note, agentCollectAmount, 'success', agent_charge, admin_charge, 0]
+                    [transaction_id, sender_id, receiver_id, transaction_type, Number(amount), agentdebited, note, agentCollectAmount, 'success', agent_charge, admin_charge, 0]
                 );
 
                 if (row.affectedRows === 1) {
@@ -131,14 +165,14 @@ exports.TransferAmount = async (req, res) => {
                 const userdeduction = Number(amount) + agentCharge + adminCharge;
                 const agentdeposite = Number(amount) + agentCharge;
 
-                if (agentdeposite !== Number(final_amount)) {
+                if (agentdeposite.toFixed(2) !== Number(final_amount.toFixed(2))) {
                     return res.json({ success: false, message: "Final Transfer Amount Mismatched  !", });
                 }
-                if (userdeduction !== Number(debit_amount)) {
+                if (userdeduction.toFixed(2) !== Number(debit_amount.toFixed(2))) {
                     return res.json({ success: false, message: "Debited Amount Mismatched  !", });
                 }
 
-                if (sender_balance < userdeduction) {
+                if (Number(sender_balance.toFixed(2)) < Number(userdeduction.toFixed(2))) {
                     return res.json({ success: false, message: "Insufficient balance. !", });
                 }
 
@@ -156,7 +190,7 @@ exports.TransferAmount = async (req, res) => {
                 const transaction_id = generateUniqueId({ length: 18, });
                 const [row] = await connection.execute(
                     insert_query,
-                    [transaction_id, sender_id, receiver_id, transaction_type, amount, agentdeposite, note, 0, 'success', agent_charge, admin_charge, userdeduction]
+                    [transaction_id, sender_id, receiver_id, transaction_type, Number(amount), agentdeposite, note, 0, 'success', agent_charge, admin_charge, userdeduction]
                 );
 
                 if (row.affectedRows === 1) {
@@ -175,7 +209,7 @@ exports.TransferAmount = async (req, res) => {
                 // user to user transfer charges
                 const userdebited = Number(amount) + adminCharge;
 
-                if (userdebited !== Number(final_amount)) {
+                if (userdebited.toFixed(2) !== Number(final_amount.toFixed(2))) {
                     return res.json({ success: false, message: "Final Transfer Amount is Mismatched  !", });
                 }
                 const [sender] = await connection.execute(sender_query, [userdebited, sender_id]);
@@ -184,7 +218,7 @@ exports.TransferAmount = async (req, res) => {
                     res.json({ success: false, message: 'Error deducting balance.' });
                 }
 
-                const [receiver] = await connection.execute(receiver_query, [amount, receiver_id]);
+                const [receiver] = await connection.execute(receiver_query, [Number(amount), receiver_id]);
                 if (receiver.affectedRows !== 1) {
                     res.json({ success: false, message: 'Error adding balance.' });
                 }
