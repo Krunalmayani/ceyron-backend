@@ -19,8 +19,7 @@ router.get('/id/:users_id', getUserByUserId);
 
 router.post("/register", [
     body('name', 'Name is required').trim().notEmpty().isString().withMessage('Name must be a string')
-        .isLength({ min: 3 }).withMessage('Name must be at least 3 characters')
-        .matches(/^[a-zA-Z\s]+$/).withMessage('Name can only contain letters and spaces'),
+        .isLength({ min: 3 }).withMessage('Name must be at least 3 characters'),
     body('email', "Invalid email address").notEmpty().escape().trim().isEmail(),
     body('phone_number', "Mobile Number are Required").notEmpty().escape().trim().isLength({ min: 10, max: 10 }),
     body('password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
@@ -36,8 +35,7 @@ router.post('/login', [
 
 router.put("/:id", [
     body('name', 'Name is required').trim().notEmpty().isString().withMessage('Name must be a string')
-        .isLength({ min: 3 }).withMessage('Name must be at least 3 characters')
-        .matches(/^[a-zA-Z\s]+$/).withMessage('Name can only contain letters and spaces'),
+        .isLength({ min: 3 }).withMessage('Name must be at least 3 characters'),
     body('email', "Invalid email address").notEmpty().escape().trim().isEmail(),
     body('phone_number', "Mobile Number are Required").notEmpty().escape().trim().isLength({ min: 10, max: 10 }),
     body('country').notEmpty().withMessage('Country is required').isLength({ max: 50 }).withMessage('Country cannot exceed 50 characters'),
