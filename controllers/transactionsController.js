@@ -71,7 +71,7 @@ exports.TransferAmount = async (req, res) => {
         const sender_balance = senderRole[0].balance;
 
 
-        const adminCharge = ((Number(amount) * Number(settings[0].admin_charge)) / 100);   // Example: 1% fee
+        const adminCharge = ((Number(amount) * Number(settings[0].admin_charge)) / 100).toFixed(2);   // Example: 1% fee
         const agentCharge = ((Number(amount) * Number(settings[0].agent_charge)) / 100).toFixed(2);   // Example: 1% fee
 
         let sender_query = "UPDATE users SET balance = balance - ? WHERE users_id=?";
@@ -165,6 +165,13 @@ exports.TransferAmount = async (req, res) => {
                 // user to agent transfer charges
                 const userdeduction = Number(amount) + Number(agentCharge) + Number(adminCharge);
                 const agentdeposite = Number(amount) + Number(agentCharge);
+
+                console.log('Number(agentdeposite)', Number(agentdeposite));
+                console.log('Number(final_amount)', Number(final_amount));
+
+                console.log('Number(userdeduction)', Number(userdeduction));
+                console.log('Number(debit_amount)', Number(debit_amount));
+                console.log('Number', Number(amount), Number(agentCharge), Number(adminCharge));
 
                 if (Number(agentdeposite) !== Number(final_amount)) {
                     return res.json({ success: false, message: "Final Transfer Amount Mismatched  !", });
