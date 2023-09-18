@@ -117,8 +117,9 @@ exports.TransferAmount = async (req, res) => {
         } else if (transaction_type === 'agent_to_user') {
             if (senderRole[0].role === 'Agent' && receiverRole[0].role === "User") {
                 // aget to user transfer charges
+                const chrages = (Number(agentCharge) + Number(adminCharge)).toFixed(2)
                 const agentdebited = Number(amount) + Number(adminCharge);
-                const agentCollectAmount = Number(agentCharge) + Number(adminCharge) + Number(amount);
+                const agentCollectAmount = Number(chrages) + Number(amount);
 
                 if (Number(agentdebited) !== Number(final_amount)) {
                     return res.json({ success: false, message: "Final Amount is Mismatched  !", });
@@ -163,7 +164,8 @@ exports.TransferAmount = async (req, res) => {
         } else if (transaction_type === 'user_to_agent') {
             if (senderRole[0].role === 'User' && receiverRole[0].role === "Agent") {
                 // user to agent transfer charges
-                const userdeduction = Number(amount) + Number(agentCharge) + Number(adminCharge);
+                const chrages = (Number(agentCharge) + Number(adminCharge)).toFixed(2)
+                const userdeduction = Number(amount) + Number(chrages);
                 const agentdeposite = Number(amount) + Number(agentCharge);
 
                 console.log('Number(agentdeposite)', Number(agentdeposite));
@@ -171,7 +173,12 @@ exports.TransferAmount = async (req, res) => {
 
                 console.log('Number(userdeduction)', Number(userdeduction));
                 console.log('Number(debit_amount)', Number(debit_amount));
+
+                console.log('Number(agentCharge)', Number(agentCharge));
+                console.log('Number(adminCharge)', Number(adminCharge));
+
                 console.log('Number', Number(amount), Number(agentCharge), Number(adminCharge));
+                console.log('charge', Number(amount), chrages, Number(agentCharge) + Number(adminCharge));
 
                 if (Number(agentdeposite) !== Number(final_amount)) {
                     return res.json({ success: false, message: "Final Transfer Amount Mismatched  !", });
