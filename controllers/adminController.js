@@ -257,7 +257,7 @@ exports.TransferAmountToAgent = async (req, res) => {
         const [senderRole] = await connection.execute('select * from users where users_id=?', [sender_id]);
         const [receiverRole] = await connection.execute('select * from users where users_id=?', [receiver_id]);
 
-        if (senderRole[0].balance < amount) {
+        if (Number(senderRole[0].balance) < Number(amount)) {
             return res.json({ success: false, message: "Insufficient balance. !", });
         }
 

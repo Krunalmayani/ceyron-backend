@@ -83,7 +83,7 @@ exports.TransferAmount = async (req, res) => {
                 const agentdebited = Number(amount) + adminCharge;
                 // user to user transfer charges
 
-                if (agentdebited.toFixed(2) !== Number(final_amount).toFixed(2)) {
+                if (Number(agentdebited) !== Number(final_amount)) {
                     return res.json({ success: false, message: "Final Transfer Amount is Mismatched  !", });
                 }
                 const [sender] = await connection.execute(sender_query, [agentdebited, sender_id]);
@@ -119,15 +119,15 @@ exports.TransferAmount = async (req, res) => {
                 const agentdebited = Number(amount) + adminCharge;
                 const agentCollectAmount = agentCharge + adminCharge + Number(amount);
 
-                if (agentdebited.toFixed(2) !== Number(final_amount).toFixed(2)) {
+                if (Number(agentdebited) !== Number(final_amount)) {
                     return res.json({ success: false, message: "Final Amount is Mismatched  !", });
                 }
 
-                if (Number(sender_balance).toFixed(2) < agentdebited.toFixed(2)) {
+                if (Number(sender_balance) < Number(agentdebited)) {
                     return res.json({ success: false, message: "Insufficient balance. !", });
                 }
 
-                if (Number(amount_to_collect.toFixed(2)) !== Number(agentCollectAmount).toFixed(2)) {
+                if (Number(amount_to_collect) !== Number(agentCollectAmount)) {
                     return res.json({ success: false, message: "Mismatch amount to be collect", });
                 }
 
@@ -165,14 +165,13 @@ exports.TransferAmount = async (req, res) => {
                 const userdeduction = Number(amount) + agentCharge + adminCharge;
                 const agentdeposite = Number(amount) + agentCharge;
 
-                if (agentdeposite.toFixed(2) !== Number(final_amount).toFixed(2)) {
+                if (Number(agentdeposite) !== Number(final_amount)) {
                     return res.json({ success: false, message: "Final Transfer Amount Mismatched  !", });
                 }
-                if (userdeduction.toFixed(2) !== Number(debit_amount).toFixed(2)) {
+                if (Number(userdeduction) !== Number(debit_amount)) {
                     return res.json({ success: false, message: "Debited Amount Mismatched  !", });
                 }
-
-                if (Number(sender_balance).toFixed(2) < Number(userdeduction).toFixed(2)) {
+                if (Number(sender_balance) < Number(userdeduction)) {
                     return res.json({ success: false, message: "Insufficient balance. !", });
                 }
 
@@ -209,7 +208,7 @@ exports.TransferAmount = async (req, res) => {
                 // user to user transfer charges
                 const userdebited = Number(amount) + adminCharge;
 
-                if (userdebited.toFixed(2) !== Number(final_amount).toFixed(2)) {
+                if (Number(userdebited) !== Number(final_amount)) {
                     return res.json({ success: false, message: "Final Transfer Amount is Mismatched  !", });
                 }
                 const [sender] = await connection.execute(sender_query, [userdebited, sender_id]);
