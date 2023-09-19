@@ -158,7 +158,7 @@ exports.agentsRegister = async (req, res) => {
                     } else {
                         return res.json({
                             success: false,
-                            message: "Feild Register Please Try Again !!!.",
+                            message: "Failed Register Please Try Again !!!.",
                         });
                     }
                 } else {
