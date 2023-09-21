@@ -32,7 +32,7 @@ exports.verifyEmail = async (req, res, next) => {
 
             return res.json({ status: 200, success: true, message: "OTP Successfully Send Please Check Email Address", });
         } else {
-            return res.json({ success: false, message: "error!" });
+            return res.json({ success: false, message: "Email Address Not Found !" })
         }
     } catch (error) {
         console.log("error :::", error);
