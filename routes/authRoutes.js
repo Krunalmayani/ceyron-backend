@@ -34,8 +34,6 @@ router.post('/set-password', [
 ], setNewPassword);
 
 
-router.get('/currency-conversion', [
-    body('country').notEmpty().withMessage('Country Name is required'),
-], changeCurrency)
+router.get('/currency-conversion', changeCurrency);
 
 module.exports = router;

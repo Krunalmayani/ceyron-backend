@@ -122,34 +122,45 @@ exports.changeCurrency = async (req, res) => {
         return res.status(422).json({ errors: errors.array() });
     }
 
-    const { country } = req.body;
+    const { country } = req.query;
 
-    const symbol = clm.getCurrencyByName(country)
+    const token = req?.headers?.authorization?.split(" ")[1];
 
-
-    if (symbol !== undefined) {
-        const config = {
-            method: 'get',
-            url: process.env.API_URL + symbol,
-            headers: { 'apikey': process.env.API_KEY }
+    try {
+        if (!token) {
+            return res.json({ success: false, status: 'error', message: "auth Token not found" });
         }
-        let response = await axios(config);
+        if (!country) {
+            return res.json({ success: false, status: 'error', message: "Pleas Add Country Name!" });
+        }
 
-        if (response?.data?.success === true) {
-            const rates = response.data.rates[symbol];
-            const data = {
-                country,
-                base: response?.data?.base,
-                symbol, rates,
-                date: response?.data?.date,
+        const symbol = clm.getCurrencyByName(country);
+
+        if (symbol !== undefined) {
+            const config = {
+                method: 'get',
+                url: process.env.API_URL + symbol,
+                headers: { 'apikey': process.env.API_KEY }
             }
-            return res.json({ success: true, status: 'success', data, })
+            let response = await axios(config);
 
+            if (response?.data?.success === true) {
+                const rates = response.data.rates[symbol];
+                const data = {
+                    country,
+                    base: response?.data?.base,
+                    symbol, rates,
+                    date: response?.data?.date,
+                }
+                return res.json({ success: true, status: 'success', data, })
+
+            } else {
+                return res.json({ success: false, message: "Currency Rates Not Found !", })
+            }
         } else {
-            return res.json({ success: false, message: "Currency Rates Not Found !", })
+            return res.json({ success: false, message: "Country Invalid !", })
         }
-    } else {
-        return res.json({ success: false, message: "Country Invalid !", })
+    } catch (error) {
+        return res.json({ success: false, message: error });
     }
-
 }
