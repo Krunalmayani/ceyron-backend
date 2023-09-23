@@ -4,7 +4,7 @@ var multer = require('multer');
 var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
-const { verifyEmail, checkOTP } = require('../controllers/authController');
+const { verifyEmail, checkOTP, changeCurrency } = require('../controllers/authController');
 const { setNewPassword } = require('../controllers/adminController');
 
 var forms = multer();
@@ -33,5 +33,9 @@ router.post('/set-password', [
     body('confirm_password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
 ], setNewPassword);
 
+
+router.get('/currency-conversion', [
+    body('country').notEmpty().withMessage('Country Name is required'),
+], changeCurrency)
 
 module.exports = router;
