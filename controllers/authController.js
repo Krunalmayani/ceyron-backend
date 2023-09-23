@@ -127,7 +127,7 @@ exports.changeCurrency = async (req, res) => {
     const symbol = clm.getCurrencyByName(country)
 
 
-    if (symbol.length > 0) {
+    if (symbol !== undefined) {
         const config = {
             method: 'get',
             url: process.env.API_URL + symbol,
