@@ -204,3 +204,35 @@ exports.updateAgents = async (req, res) => {
         return res.json({ success: false, error })
     }
 }
+
+exports.searchCityStateCountry = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors });
+    }
+
+    const searchQuery = req?.params?.query;
+
+    const sqlQuery = `SELECT u.id,u.users_id,u.name,u.business_name,u.branch_name,u.email,u.phone_number,kyc.address,kyc.city,kyc.state,kyc.country,u.balance,u.kyc_status,kyc.dob,kyc.zipcode,u.role,u.status
+ from users u INNER JOIN kycdetails kyc ON u.users_id = kyc.agents_id  WHERE u.role='Agent' AND u.country = kyc.country AND
+(kyc.city LIKE ? OR kyc.state LIKE ?  OR kyc.country LIKE ?)`
+
+
+    const token = req?.headers?.authorization?.split(" ")[1];
+    try {
+        if (!token) {
+            return res.json({ success: false, message: "auth Token not found" });
+        }
+        const [row] = await connection.execute(sqlQuery, [`%${searchQuery}%`, `%${searchQuery}%`, `%${searchQuery}%`])
+
+        if (row.length > 0) {
+            return res.json({ data: row, success: true, status: 'success' })
+        } else {
+            return res.json({ success: false, message: "Data Not Found !" });
+        }
+    } catch (error) {
+        return res.json({ success: false, error })
+    }
+
+}

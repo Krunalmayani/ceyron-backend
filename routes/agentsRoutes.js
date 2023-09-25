@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const { body } = require('express-validator');
 const multer = require('multer');
 const { setSecurityPin, changePassword, deleteUsers, changeSecurityPin } = require('../controllers/usersController');
-const { agentsLogin, agentsRegister, updateAgents, getAllAgents, getAgentById, getAgentByUserId } = require('../controllers/agentsController');
+const { agentsLogin, agentsRegister, updateAgents, getAllAgents, getAgentById, getAgentByUserId, searchCityStateCountry } = require('../controllers/agentsController');
 const { changeKycStatus } = require('../controllers/kycController');
 
 var forms = multer();
@@ -102,6 +102,9 @@ router.put('/kyc/:id', [
     body('status', "Fill the Staus feild").notEmpty(),
     body('email', "Invalid email address").notEmpty().escape().trim().isEmail(),
 ], changeKycStatus);
+
+
+router.get('/search/:query', searchCityStateCountry)
 
 module.exports = router;
 
