@@ -9,7 +9,7 @@ exports.kycVerifyData = async (req, res) => {
         return res.status(422).json({ errors: errors.array() });
     }
 
-    const { agents_id, full_name, email, dob, address, state, country, zip_code } = req.body;
+    const { agents_id, full_name, email, dob, address, city, state, country, zip_code } = req.body;
 
     if (!req.files) {
         return res.json({ success: false, message: 'Image is Not upload!' })
@@ -34,8 +34,8 @@ exports.kycVerifyData = async (req, res) => {
         }
 
         const [rows] = await connection.execute(
-            "INSERT INTO  kycdetails (`agents_id`,`name`,`email`,`dob`,`address`,`state`,`country`,`zipcode`,`selfie_with_document`,`front_document`,`back_document`) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
-            [agents_id, full_name, email, new Date(dob), address, state, country, zip_code, selfie_with_document, front_document, back_document]
+            "INSERT INTO  kycdetails (`agents_id`,`name`,`email`,`dob`,`address`,`city`,`state`,`country`,`zipcode`,`selfie_with_document`,`front_document`,`back_document`) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+            [agents_id, full_name, email, new Date(dob), address, city, state, country, zip_code, selfie_with_document, front_document, back_document]
         );
 
         if (rows.affectedRows === 1 && col.affectedRows === 1) {

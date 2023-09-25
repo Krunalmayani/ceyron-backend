@@ -64,6 +64,7 @@ app.post("/",
         return true; // Validation passed
     }),
     body('address').notEmpty().withMessage('Address is required'),
+    body('city').notEmpty().withMessage('city is required'),
     body('state').notEmpty().withMessage('State is required'),
     body('country').notEmpty().withMessage('Country is required'),
     body('zip_code').isPostalCode('any').withMessage('Invalid zip code format'),
