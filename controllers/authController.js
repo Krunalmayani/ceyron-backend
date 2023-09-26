@@ -131,7 +131,7 @@ exports.changeCurrency = async (req, res) => {
             return res.json({ success: false, status: 'error', message: "auth Token not found" });
         }
         if (!country) {
-            return res.json({ success: false, status: 'error', message: "Pleas Add Country Name!" });
+            return res.json({ success: false, status: 'error', message: "Please Add Country Name!" });
         }
 
         const symbol = clm.getCurrencyByName(country);
@@ -162,5 +162,35 @@ exports.changeCurrency = async (req, res) => {
         }
     } catch (error) {
         return res.json({ success: false, message: error });
+    }
+}
+
+
+exports.changeCountry = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
+    const { id, country } = req.body;
+
+    const token = req?.headers?.authorization?.split(" ")[1];
+    try {
+        if (!token) {
+            return res.json({ success: false, message: "auth Token not found" });
+        }
+        const [rows] = await connection.execute("UPDATE users SET  currency_country=?  WHERE id=?", [country, id])
+        if (rows.affectedRows === 1) {
+            const [row] = await connection.execute('select * from users WHERE id=?', [id])
+
+            return res.json({ success: true, status: "success", message: 'Agents successfully Update !', data: row[0] })
+        } else {
+            return res.json({ success: false, message: 'Not update !' })
+        }
+
+    } catch (error) {
+        console.log('error :', error);
+        return res.json({ success: false, error });
     }
 }
