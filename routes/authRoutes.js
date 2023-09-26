@@ -4,7 +4,7 @@ var multer = require('multer');
 var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
-const { verifyEmail, checkOTP, changeCurrency, changeCountry } = require('../controllers/authController');
+const { verifyEmail, checkOTP, changeCurrency, changeCountry, getAllCountries } = require('../controllers/authController');
 const { setNewPassword } = require('../controllers/adminController');
 
 var forms = multer();
@@ -35,6 +35,7 @@ router.post('/set-password', [
 
 
 router.get('/currency-conversion', changeCurrency);
+router.get('/getCountry', getAllCountries);
 
 router.put('/change-country', [
     body('id', "ID is Required").notEmpty().escape().trim(),

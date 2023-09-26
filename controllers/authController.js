@@ -194,3 +194,28 @@ exports.changeCountry = async (req, res) => {
         return res.json({ success: false, error });
     }
 }
+
+exports.getAllCountries = async (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
+    const token = req?.headers?.authorization?.split(" ")[1];
+    try {
+        if (!token) {
+            return res.json({ success: false, message: "auth Token not found" });
+        } else {
+            const countryList = clm.getAllCountries();
+            if (countryList.length > 0) {
+                return res.json({ data: countryList, success: true, status: 'success', })
+            } else {
+                return res.json({ success: false, message: "Data Not Found !" });
+            }
+        }
+    } catch (error) {
+        return res.json({ success: false, error })
+    }
+}
