@@ -156,15 +156,14 @@ exports.getKycDataBYID = async (req, res) => {
     }
 }
 
-exports.changeKycStatus = async (req, res) => {
+exports.canclledKYC = async (req, res) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
 
-    const { email, status, users_id } = req.body;
-    const { id, } = req.params;
+    const { status, agents_id, reason, role } = req.body;
 
     const token = req?.headers?.authorization?.split(" ")[1];
     try {
@@ -172,13 +171,44 @@ exports.changeKycStatus = async (req, res) => {
             return res.json({ success: false, status: 'error', message: "auth Token not found" });
         }
 
-        const [rows] = await connection.execute("UPDATE kycdetails SET status = ?, email = ? WHERE id = ? AND agents_id = ?", [status, email, id, users_id]);
+        const [rows] = await connection.execute("UPDATE kycdetails SET status = ?  WHERE agents_id = ?", [status, agents_id]);
 
-        const [cols] = await connection.execute("UPDATE users SET kyc_status = ?   WHERE  users_id = ?", [status, users_id]);
+        const [cols] = await connection.execute("UPDATE users SET kyc_status = ? , kyc_reason= ?  WHERE  users_id = ?", [status, reason, agents_id]);
         if (rows.affectedRows === 1 && cols.affectedRows === 1) {
-            const [row] = await connection.execute('select * from kycdetails WHERE id=? AND agents_id = ?', [Number(id), users_id])
+            const [row] = await connection.execute('select * from kycdetails WHERE agents_id = ?', [agents_id])
 
-            return res.json({ success: true, status: 'success', message: 'Status successfully Updated !', data: row[0] })
+            return res.json({ success: true, status: 'success', message: 'Status successfully Updated !', data: row[0], role })
+        } else {
+            return res.json({ success: false, message: 'Contest Category Not Updated !' })
+        }
+
+    } catch (error) {
+        return res.json({ success: false, message: error });
+    }
+}
+
+exports.approvedKYC = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
+    const { status, agents_id, role } = req.body;
+
+    const token = req?.headers?.authorization?.split(" ")[1];
+    try {
+        if (!token) {
+            return res.json({ success: false, status: 'error', message: "auth Token not found" });
+        }
+
+        const [rows] = await connection.execute("UPDATE kycdetails SET status = ?  WHERE agents_id = ?", [status, agents_id]);
+
+        const [cols] = await connection.execute("UPDATE users SET kyc_status = ?   WHERE  users_id = ?", [status, agents_id]);
+        if (rows.affectedRows === 1 && cols.affectedRows === 1) {
+            const [row] = await connection.execute('select * from kycdetails WHERE agents_id = ?', [agents_id])
+
+            return res.json({ success: true, status: 'success', message: 'Status successfully Updated !', data: row[0], role })
         } else {
             return res.json({ success: false, message: 'Contest Category Not Updated !' })
         }

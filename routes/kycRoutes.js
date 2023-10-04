@@ -3,7 +3,7 @@ const app = express()
 const multer = require('multer')
 const path = require('path')
 const cors = require("cors");
-const { kycVerifyData, getKycData, getKycDataBYID, deleteKYC, getAgentKycData, getUserKycData } = require("../controllers/kycController");
+const { kycVerifyData, getKycData, getKycDataBYID, deleteKYC, getAgentKycData, getUserKycData, canclledKYC, approvedKYC } = require("../controllers/kycController");
 const { body } = require('express-validator');
 
 
@@ -75,5 +75,16 @@ app.get('/agent', getAgentKycData);
 app.get('/user', getUserKycData);
 app.get('/:id', getKycDataBYID);
 app.delete("/:id", deleteKYC);
+
+app.post('/cancleKYC', [
+    body('reason').notEmpty().withMessage('Reason is required'),
+    body('agents_id').notEmpty().withMessage('Agent ID is required'),
+    body('status', "Fill the Staus feild").notEmpty(),
+], canclledKYC);
+
+app.post('/approveKYC', [
+    body('agents_id').notEmpty().withMessage('Agent ID is required'),
+    body('status', "Fill the Staus feild").notEmpty(),
+], approvedKYC)
 
 module.exports = app;

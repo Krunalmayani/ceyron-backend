@@ -7,7 +7,6 @@ const { body } = require('express-validator');
 const multer = require('multer');
 const { setSecurityPin, changePassword, deleteUsers, changeSecurityPin } = require('../controllers/usersController');
 const { agentsLogin, agentsRegister, updateAgents, getAllAgents, getAgentById, getAgentByUserId, searchCityStateCountry } = require('../controllers/agentsController');
-const { changeKycStatus } = require('../controllers/kycController');
 
 var forms = multer();
 router.use(forms.array());
@@ -94,14 +93,6 @@ router.post("/change-password", [
     body('new_password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
     body('confirm_password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
 ], changePassword);
-
-
-router.put('/kyc/:id', [
-    body('id', "ID is Required").notEmpty().escape().trim(),
-    body('users_id', "Users ID is Required").notEmpty().escape().trim(),
-    body('status', "Fill the Staus feild").notEmpty(),
-    body('email', "Invalid email address").notEmpty().escape().trim().isEmail(),
-], changeKycStatus);
 
 
 router.get('/search/:query', searchCityStateCountry)
