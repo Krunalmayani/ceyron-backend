@@ -94,6 +94,8 @@ exports.TransferAmount = async (req, res) => {
                 }
 
                 const [receiver] = await connection.execute(receiver_query, [Number(amount), receiver_id]);
+                const [admin] = await connection.execute("UPDATE users SET commission = commission + ? WHERE email=?", [adminCharge, 'vishalsavaliya3@gmail.com']);
+
                 if (receiver.affectedRows !== 1) {
                     res.json({ success: false, message: 'Error adding balance.' });
                 }
@@ -140,6 +142,8 @@ exports.TransferAmount = async (req, res) => {
                 }
 
                 const [receiver] = await connection.execute(receiver_query, [Number(amount), receiver_id]);
+                const [admin] = await connection.execute("UPDATE users SET commission = commission + ? WHERE email=?", [adminCharge, 'vishalsavaliya3@gmail.com']);
+
                 if (receiver.affectedRows !== 1) {
                     res.json({ success: false, message: 'Error adding balance.' });
                 }
@@ -168,18 +172,6 @@ exports.TransferAmount = async (req, res) => {
                 const userdeduction = Number(amount) + Number(chrages);
                 const agentdeposite = Number(amount) + Number(agentCharge);
 
-                console.log('Number(agentdeposite)', Number(agentdeposite));
-                console.log('Number(final_amount)', Number(final_amount));
-
-                console.log('Number(userdeduction)', Number(userdeduction));
-                console.log('Number(debit_amount)', Number(debit_amount));
-
-                console.log('Number(agentCharge)', Number(agentCharge));
-                console.log('Number(adminCharge)', Number(adminCharge));
-
-                console.log('Number', Number(amount), Number(agentCharge), Number(adminCharge));
-                console.log('charge', Number(amount), chrages, Number(agentCharge) + Number(adminCharge));
-
                 if (Number(agentdeposite) !== Number(final_amount)) {
                     return res.json({ success: false, message: "Final Transfer Amount Mismatched  !", });
                 }
@@ -196,7 +188,8 @@ exports.TransferAmount = async (req, res) => {
                     res.json({ success: false, message: 'Error deducting balance.' });
                 }
 
-                const [receiver] = await connection.execute(receiver_query, [agentdeposite, receiver_id]);
+                const [receiver] = await connection.execute("UPDATE users SET balance = balance + ?, commission = commission + ? WHERE users_id=?", [agentdeposite, agentCharge, receiver_id]);
+                const [admin] = await connection.execute("UPDATE users SET commission = commission + ? WHERE email=?", [adminCharge, 'vishalsavaliya3@gmail.com']);
                 if (receiver.affectedRows !== 1) {
                     res.json({ success: false, message: 'Error adding balance.' });
                 }
@@ -233,6 +226,7 @@ exports.TransferAmount = async (req, res) => {
                 }
 
                 const [receiver] = await connection.execute(receiver_query, [Number(amount), receiver_id]);
+                const [admin] = await connection.execute("UPDATE users SET commission = commission + ? WHERE email=?", [adminCharge, 'vishalsavaliya3@gmail.com']);
                 if (receiver.affectedRows !== 1) {
                     res.json({ success: false, message: 'Error adding balance.' });
                 }
