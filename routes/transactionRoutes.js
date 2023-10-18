@@ -3,7 +3,7 @@ var express = require('express');
 const cors = require('cors');
 var router = express.Router();
 const bodyParser = require('body-parser');
-const { getAllTransactions } = require('../controllers/transactionsController');
+const { getAllTransactions, getTransactionsByID } = require('../controllers/transactionsController');
 const multer = require('multer');
 
 var forms = multer();
@@ -13,6 +13,7 @@ router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
 router.get('/', getAllTransactions);
+router.get('/:users_id', getTransactionsByID);
 
 
 
