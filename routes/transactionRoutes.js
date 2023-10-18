@@ -13,6 +13,7 @@ router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
 
 router.get('/', getAllTransactions);
+
 router.get('/:users_id', getTransactionsByID);
 
 

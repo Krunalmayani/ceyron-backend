@@ -280,7 +280,6 @@ exports.getTransactionsByID = async (req, res) => {
 
             const [row] = await connection.execute('SELECT t.id,t.transaction_id,t.sender_id,sender.name AS sender_name,sender.role AS sender_role, t.receiver_id, receiver.name AS receiver_name, receiver.role AS receiver_role, t.transaction_type, t.amount, t.transaction_date, t.final_amount, t.amount_to_collect, t.transaction_status, t.admin_charge, t.agent_charge, t.note, t.debit_amount FROM transactions t INNER JOIN users sender on t.sender_id = sender.users_id INNER JOIN users receiver ON t.receiver_id = receiver.users_id WHERE sender_id = ? OR receiver_id = ?  LIMIT ?,?', [users_id, users_id, offset.toString(), perPage.toString()]);
             const [totalCount] = await connection.execute('SELECT COUNT(*) as total FROM transactions t INNER JOIN users sender on t.sender_id = sender.users_id INNER JOIN users receiver ON t.receiver_id = receiver.users_id WHERE sender_id = ? OR receiver_id = ? ', [users_id, users_id]);
-
             const totalRecords = totalCount[0].total;
             const totalPages = Math.ceil(totalRecords / perPage);
 
