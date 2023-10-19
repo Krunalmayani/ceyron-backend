@@ -278,13 +278,43 @@ exports.getTransactionsByID = async (req, res) => {
             return res.json({ success: false, message: "auth Token not found" });
         } else {
 
-            const [row] = await connection.execute('SELECT t.id,t.transaction_id,t.sender_id,sender.name AS sender_name,sender.role AS sender_role, t.receiver_id, receiver.name AS receiver_name, receiver.role AS receiver_role, t.transaction_type, t.amount, t.transaction_date, t.final_amount, t.amount_to_collect, t.transaction_status, t.admin_charge, t.agent_charge, t.note, t.debit_amount FROM transactions t INNER JOIN users sender on t.sender_id = sender.users_id INNER JOIN users receiver ON t.receiver_id = receiver.users_id WHERE sender_id = ? OR receiver_id = ?  LIMIT ?,?', [users_id, users_id, offset.toString(), perPage.toString()]);
-            const [totalCount] = await connection.execute('SELECT COUNT(*) as total FROM transactions t INNER JOIN users sender on t.sender_id = sender.users_id INNER JOIN users receiver ON t.receiver_id = receiver.users_id WHERE sender_id = ? OR receiver_id = ? ', [users_id, users_id]);
+            const [row] = await connection.execute('SELECT t.id,t.transaction_id,t.sender_id,sender.name AS sender_name,sender.role AS sender_role, t.receiver_id, receiver.name AS receiver_name, receiver.role AS receiver_role, t.transaction_type, t.amount, t.transaction_date, t.final_amount, t.amount_to_collect, t.transaction_status, t.admin_charge, t.agent_charge, t.note, t.debit_amount FROM transactions t INNER JOIN users sender on t.sender_id = sender.users_id INNER JOIN users receiver ON t.receiver_id = receiver.users_id WHERE t.sender_id = ? OR t.receiver_id = ? ORDER BY transaction_date DESC LIMIT ?,?', [users_id, users_id, offset.toString(), perPage.toString()]);
+            const [totalCount] = await connection.execute('SELECT COUNT(*) as total FROM transactions t WHERE t.sender_id = ? OR t.receiver_id = ? ', [users_id, users_id]);
+
             const totalRecords = totalCount[0].total;
             const totalPages = Math.ceil(totalRecords / perPage);
 
             if (row.length > 0) {
                 return res.json({ success: true, status: 'success', currentPage: pageNo, totalPages: totalPages, totalRecords: totalRecords, data: row, })
+            } else {
+                return res.json({ success: false, message: "Data Not Found !" });
+            }
+        }
+    } catch (error) {
+        return res.json({ success: false, error })
+    }
+}
+
+exports.getTransactionsByDateRange = async (req, res) => {
+
+    const { startDate, endDate } = req.query;
+    const users_id = req.params.users_id;
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
+    const token = req?.headers?.authorization?.split(" ")[1];
+    try {
+        if (!token) {
+            return res.json({ success: false, message: "auth Token not found" });
+        } else {
+
+            const [row] = await connection.execute('SELECT * FROM  transactions WHERE transaction_date BETWEEN ? AND ?  AND  sender_id = ? OR  receiver_id = ? ORDER BY transaction_date DESC', [startDate.toString(), endDate.toString(), users_id, users_id]);
+
+            if (row.length > 0) {
+                return res.json({ success: true, status: 'success', data: row })
             } else {
                 return res.json({ success: false, message: "Data Not Found !" });
             }
