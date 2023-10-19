@@ -311,7 +311,7 @@ exports.getTransactionsByDateRange = async (req, res) => {
             return res.json({ success: false, message: "auth Token not found" });
         } else {
 
-            const [row] = await connection.execute('SELECT * FROM  transactions WHERE transaction_date BETWEEN ? AND ?  AND  sender_id = ? OR  receiver_id = ? ORDER BY transaction_date DESC', [startDate.toString(), endDate.toString(), users_id, users_id]);
+            const [row] = await connection.execute('SELECT * FROM transactions WHERE (sender_id =? OR receiver_id = ?) AND transaction_date BETWEEN ? AND ? ORDER BY transaction_date DESC', [users_id, users_id, startDate.toString(), endDate.toString()]);
 
             if (row.length > 0) {
                 return res.json({ success: true, status: 'success', data: row })
