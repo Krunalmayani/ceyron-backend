@@ -278,7 +278,7 @@ exports.getTransactionsByID = async (req, res) => {
             return res.json({ success: false, message: "auth Token not found" });
         } else {
 
-            const [row] = await connection.execute('SELECT t.id,t.transaction_id,t.sender_id,sender.name AS sender_name,sender.role AS sender_role, t.receiver_id, receiver.name AS receiver_name, receiver.role AS receiver_role, t.transaction_type, t.amount, t.transaction_date, t.final_amount, t.amount_to_collect, t.transaction_status, t.admin_charge, t.agent_charge, t.note, t.debit_amount FROM transactions t INNER JOIN users sender on t.sender_id = sender.users_id INNER JOIN users receiver ON t.receiver_id = receiver.users_id WHERE t.sender_id = ? OR t.receiver_id = ? ORDER BY transaction_date DESC LIMIT ?,?', [users_id, users_id, offset.toString(), perPage.toString()]);
+            const [row] = await connection.execute('SELECT t.id,t.transaction_id, t.sender_id, sender.name AS sender_name, sender.email AS sender_email, sender.role AS sender_role, t.receiver_id,  receiver.name AS receiver_name, receiver.role AS receiver_role, receiver.email AS receiver_email, receiver.role AS receiver_role, t.transaction_type, t.amount, t.transaction_date,  t.final_amount,  t.amount_to_collect,  t.transaction_status, t.admin_charge, t.agent_charge, t.note, t.debit_amount FROM transactions t INNER JOIN users sender ON t.sender_id = sender.users_id INNER JOIN users receiver ON t.receiver_id = receiver.users_id WHERE t.sender_id = ? OR t.receiver_id = ? ORDER BY transaction_date DESC LIMIT ?,?', [users_id, users_id, offset.toString(), perPage.toString()]);
             const [totalCount] = await connection.execute('SELECT COUNT(*) as total FROM transactions t WHERE t.sender_id = ? OR t.receiver_id = ? ', [users_id, users_id]);
 
             const totalRecords = totalCount[0].total;
@@ -300,7 +300,7 @@ exports.getTransactionsByDateRange = async (req, res) => {
     const { startDate, endDate } = req.query;
     const users_id = req.params.users_id;
     const errors = validationResult(req);
-
+    console.log(' req.query :L', req.query);
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
     }
@@ -311,7 +311,7 @@ exports.getTransactionsByDateRange = async (req, res) => {
             return res.json({ success: false, message: "auth Token not found" });
         } else {
 
-            const [row] = await connection.execute('SELECT * FROM transactions WHERE (sender_id =? OR receiver_id = ?) AND transaction_date BETWEEN ? AND ? ORDER BY transaction_date DESC', [users_id, users_id, startDate.toString(), endDate.toString()]);
+            const [row] = await connection.execute('SELECT t.id,t.transaction_id, t.sender_id, sender.name AS sender_name, sender.email AS sender_email, sender.role AS sender_role, t.receiver_id,  receiver.name AS receiver_name, receiver.role AS receiver_role, receiver.email AS receiver_email, receiver.role AS receiver_role, t.transaction_type, t.amount, t.transaction_date,  t.final_amount,  t.amount_to_collect,  t.transaction_status, t.admin_charge, t.agent_charge, t.note, t.debit_amount FROM transactions t INNER JOIN users sender ON t.sender_id = sender.users_id INNER JOIN users receiver ON t.receiver_id = receiver.users_id WHERE (sender_id =? OR receiver_id = ?) AND transaction_date BETWEEN ? AND ? ORDER BY transaction_date DESC', [users_id, users_id, startDate.toString(), endDate.toString()]);
 
             if (row.length > 0) {
                 return res.json({ success: true, status: 'success', data: row })
