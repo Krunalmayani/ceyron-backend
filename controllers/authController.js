@@ -76,7 +76,7 @@ async function sendEmail(email, otp) {
     var email = email;
 
     const transporter = nodemailer.createTransport({
-        host: 'smtp.gmail.com', // SMTP server hostname
+        host: process.env.EMAIL_HOST, // SMTP server hostname
         port: 587, // TLS port for secure email communication
         secure: false, // Set to true for TLS, false for non-secure
         auth: {

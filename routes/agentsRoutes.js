@@ -5,7 +5,7 @@ var router = express.Router();
 const bodyParser = require('body-parser');
 const { body } = require('express-validator');
 const multer = require('multer');
-const { setSecurityPin, changePassword, deleteUsers, changeSecurityPin } = require('../controllers/usersController');
+const { setSecurityPin, changePassword, deleteUsers, changeSecurityPin, usersLogin } = require('../controllers/usersController');
 const { agentsLogin, agentsRegister, updateAgents, getAllAgents, getAgentById, getAgentByUserId, searchCityStateCountry } = require('../controllers/agentsController');
 
 var forms = multer();
@@ -22,10 +22,9 @@ router.get('/:id', getAgentById);
 router.get('/id/:users_id', getAgentByUserId);
 
 router.post('/login', [
-    body('agents_id', "Agents ID is Required").notEmpty().escape().trim(),
-    body('phone_number', "Mobile Number are Required").notEmpty().escape().trim().isLength({ min: 10, max: 10 }),
+    body('email', "Invalid email address").notEmpty().escape().trim().isEmail(),
     body('password', "The Password must be of minimum 6 characters length").notEmpty().trim().isLength({ min: 6 }),
-], agentsLogin);
+], usersLogin);
 
 
 router.post("/register", [
