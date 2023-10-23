@@ -26,7 +26,7 @@ exports.verifyEmail = async (req, res, next) => {
             const [cols] = await connection.execute("UPDATE users SET otp=?  WHERE email=?", [OTP, email]);
 
             if (cols.affectedRows === 1) {
-                await sendEmail(email, OTP);
+                await sendEmail(email, row[0]?.name || 'Customer', OTP);
             } else {
                 return res.json({ success: false, message: "Failed !" });
 
@@ -72,7 +72,7 @@ exports.checkOTP = async (req, res, next) => {
 
 }
 
-async function sendEmail(email, otp) {
+async function sendEmail(email, name, otp) {
     var email = email;
 
     const transporter = nodemailer.createTransport({
@@ -86,16 +86,37 @@ async function sendEmail(email, otp) {
     });
 
     var mailOptions = {
-        from: process.env.EMAIL_USER,
+        from: process.env.EMAIL_ADDRESS,
         to: email,
-        subject: "ceyron.com",
-        text: "That was easy!",
-        html: ` <div class="container" style="max-width: 90%; margin: auto; padding-top: 20px">
-              <h2>Welcome to the Ceyron.</h2>
-              <p style="margin-bottom: 30px;">Pleas enter the  OTP to get started</p>
-              <h1 style="font-size: 40px; letter-spacing: 2px; text-align:center;">${otp}</h1>
-            </div>
-          `,
+        subject: "Your Ceyron App Password Reset",
+        html: ` 
+        <div>
+        <p style="font-weight: 900;color: #000">Dear ${name}, </p>
+        <p style="color: #000;">You recently requested a password reset for your Ceyron App account. We've generated a 6-digit PIN for you to complete this process. </p>
+
+        <p style="color: #000;">Your 6-digit PIN is: <span style="font-weight: 900;color: #000;">${otp}</span></p>
+
+        <p  style="font-weight: 900;color: #000;">To reset your password, please follow these steps:</p>
+
+        <ol  style="color: #000;">
+            <li style="color: #000;">Open the Ceyron App on your device.</li>
+            <li style="color: #000;">When prompted, enter your registered email ID: ${email}.</li>
+            <li style="color: #000;"> Enter the 6-digit PIN you received in this email.</li>
+            <li style="color: #000;"> Follow the on-screen instructions to set a new password for your account.</li>
+        </ol>
+        
+        <p style="font-weight: 900;color: #000">Important Security Note:</p>
+        
+        <ul  style="color: #000;">
+            <li style="color: #000;">Do not share your PIN with anyone.</li>
+            <li style="color: #000;">If you did not request this password reset, please contact our support team immediately.</li>
+            <li style="color: #000;"> Thank you for choosing Ceyron for your money transfer needs. If you have any questions or need assistance, please don't hesitate to reach out to our customer support team.</li>
+        </ul>
+        <br />
+
+        <p style="color: #000;"> Best regards,</p>
+        <p style="color: #000;"> The Ceyron Team </p>
+        `,
     };
 
     transporter.verify(async function (error, success) {

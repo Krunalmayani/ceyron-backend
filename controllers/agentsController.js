@@ -4,6 +4,7 @@ const connection = require("../db").promise();
 const bcrypt = require("bcryptjs");
 const generateUniqueId = require('generate-unique-id');
 const generateToken = require("../untils/generateToken");
+const sendRegisterEmail = require("../untils/emailVerify");
 
 exports.getAllAgents = async (req, res) => {
     const errors = validationResult(req);
@@ -148,6 +149,8 @@ exports.agentsRegister = async (req, res) => {
                     );
                     if (rows.affectedRows === 1) {
                         const [col] = await connection.execute("SELECT * FROM users WHERE id=?", [rows.insertId]);
+                        await sendRegisterEmail(email, col[0]?.name || 'Customer');
+
                         return res.json({
                             success: true,
                             status: "success",
