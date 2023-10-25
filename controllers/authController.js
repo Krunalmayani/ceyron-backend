@@ -90,33 +90,82 @@ async function sendEmail(email, name, otp) {
         to: email,
         subject: "Your Ceyron App Password Reset",
         html: ` 
-        <div>
-        <p style="font-weight: 900;color: #000">Dear ${name}, </p>
-        <p style="color: #000;">You recently requested a password reset for your Ceyron App account. We've generated a 6-digit PIN for you to complete this process. </p>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f5f5f5;
+                    margin: 0;
+                    padding: 0;
+                }
 
-        <p style="color: #000;">Your 6-digit PIN is: <span style="font-weight: 900;color: #000;">${otp}</span></p>
+                .container {
+                    margin: 0 auto;
+                    padding: 20px;
+                    background-color: #fff;
+                }
 
-        <p  style="font-weight: 900;color: #000;">To reset your password, please follow these steps:</p>
+                p {
+                    font-size: 16px;
+                    line-height: 1.6;
+                    margin-bottom: 15px;
+                }
 
-        <ol  style="color: #000;">
-            <li style="color: #000;">Open the Ceyron App on your device.</li>
-            <li style="color: #000;">When prompted, enter your registered email ID: ${email}.</li>
-            <li style="color: #000;"> Enter the 6-digit PIN you received in this email.</li>
-            <li style="color: #000;"> Follow the on-screen instructions to set a new password for your account.</li>
-        </ol>
-        
-        <p style="font-weight: 900;color: #000">Important Security Note:</p>
-        
-        <ul  style="color: #000;">
-            <li style="color: #000;">Do not share your PIN with anyone.</li>
-            <li style="color: #000;">If you did not request this password reset, please contact our support team immediately.</li>
-            <li style="color: #000;"> Thank you for choosing Ceyron for your money transfer needs. If you have any questions or need assistance, please don't hesitate to reach out to our customer support team.</li>
-        </ul>
-        <br />
+                ol {
+                    margin-left: 20px;
+                    font-size: 14px;
+                }
 
-        <p style="color: #000;"> Best regards,</p>
-        <p style="color: #000;"> The Ceyron Team </p>
-        `,
+                strong {
+                    font-weight: bold;
+                }
+
+                .important-note {
+                    padding: 10px;
+                    margin-top: 20px;
+                }
+
+                .contact-info {
+                    font-size: 14px;
+                }
+
+                .signature {
+                    font-style: italic;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+
+                <p>Dear ${name},</p>
+
+                <p>You recently requested a password reset for your Ceyron App account. We've generated a 6-digit PIN for you to complete this process.</p>
+
+                <p>Your 6-digit PIN is: <strong>${otp}</strong></p>
+
+                <p><strong>To reset your password, please follow these steps:</strong></p>
+                <ol>
+                    <li>Open the Ceyron App on your device.</li>
+                    <li>When prompted, enter your registered email ID: ${email}.</li>
+                    <li>Enter the 6-digit PIN you received in this email.</li>
+                    <li>Follow the on-screen instructions to set a new password for your account.</li>
+                </ol>
+
+                <div class="important-note">
+                    <p><strong>Important Security Note:</strong></p>
+                    <p>Do not share your PIN with anyone.</p>
+                    <p>If you did not request this password reset, please contact our support team immediately.</p>
+                </div>
+
+                <p>Thank you for choosing Ceyron for your money transfer needs. If you have any questions or need assistance, please don't hesitate to reach out to our customer support team.</p>
+                <br />
+                <p class="contact-info"><strong>Best regards,</strong></p>
+                <p class="signature">The Ceyron Team</p>
+            </div>
+        </body>
+        </html>`,
     };
 
     transporter.verify(async function (error, success) {

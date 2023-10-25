@@ -3,6 +3,7 @@ const connection = require("../db").promise();
 const bcrypt = require("bcryptjs");
 const generateToken = require("../untils/generateToken");
 const generateUniqueId = require("generate-unique-id");
+const { sendAgentEMail } = require("../untils/sendEmail");
 
 
 exports.register = async (req, res) => {
@@ -238,6 +239,58 @@ exports.updateGlobalSettings = async (req, res) => {
     } catch (error) {
         return res.json({ success: false, error })
     }
+}
+
+exports.createAgents = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors });
+    }
+
+    const { name, business_name, branch_name, email, phone_number, password, confirm_password, role, country } = req.body
+    const hash_pass = await bcrypt.hash(password, 12);
+    const theToken = generateToken(email)
+    try {
+        if (theToken) {
+            if (password === confirm_password) {
+                const [row] = await connection.execute("SELECT * FROM users WHERE `email`=? AND `phone_number`=? ", [email, phone_number]);
+                if (row.length === 0) {
+                    const agents_id = generateUniqueId({ length: 10, useLetters: false });
+                    const [rows] = await connection.execute(
+                        "INSERT INTO users(`users_id`,`name`,`business_name`,`branch_name`,`email`,`phone_number`,`password`,`country`,`role`,`access_token`,`currency_country`) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                        [agents_id, name, business_name, branch_name, email, phone_number, hash_pass, country, role, theToken, country]
+                    );
+                    if (rows.affectedRows === 1) {
+                        const [col] = await connection.execute("SELECT * FROM users WHERE id=?", [rows.insertId]);
+                        await sendAgentEMail(name, email, password);
+
+                        return res.json({
+                            success: true,
+                            status: "success",
+                            message: "Successfully Register...",
+                            data: col[0],
+                            token: theToken,
+                        });
+                    } else {
+                        return res.json({
+                            success: false,
+                            message: "Failed Register Please Try Again !!!.",
+                        });
+                    }
+                } else {
+                    return res.json({ success: false, message: "The E-mail and Mobile Number already in use", });
+                }
+            } else {
+                return res.json({ success: false, message: "Both Password is not Match" });
+            }
+        } else {
+            return res.json({ success: false, message: "jwtToken not generate Please try again !", });
+        }
+
+    } catch (error) {
+        return res.json({ success: false, message: error.message });
+    }
+
 }
 
 exports.TransferAmountToAgent = async (req, res) => {

@@ -4,7 +4,7 @@ const connection = require("../db").promise();
 const bcrypt = require("bcryptjs");
 const generateUniqueId = require('generate-unique-id');
 const generateToken = require("../untils/generateToken");
-const sendRegisterEmail = require("../untils/emailVerify");
+const { sendRegisterEmail } = require("../untils/sendEmail");
 
 exports.getAllAgents = async (req, res) => {
     const errors = validationResult(req);
