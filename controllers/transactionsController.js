@@ -50,6 +50,8 @@ exports.TransferAmount = async (req, res) => {
         const [receiverRole] = await connection.execute('select * from users where users_id=?', [receiver_id]);
         const [settings] = await connection.execute('select * from global_settings where charge_type=?', [transaction_type]);
 
+
+
         if (settings.length === 0) {
             return res.json({ success: false, message: "Transaction Type is not valid... !" });
         }
@@ -71,19 +73,25 @@ exports.TransferAmount = async (req, res) => {
         const sender_balance = senderRole[0].balance;
 
 
-        const adminCharge = ((Number(amount) * Number(settings[0].admin_charge)) / 100).toFixed(2);   // Example: 1% fee
-        const agentCharge = ((Number(amount) * Number(settings[0].agent_charge)) / 100).toFixed(2);   // Example: 1% fee
+
+        const adminCharge = ((Number(amount) * Number(settings[0].admin_charge)) / 100).toFixed(6);   // Example: 1% fee
+        const agentCharge = ((Number(amount) * Number(settings[0].agent_charge)) / 100).toFixed(6);   // Example: 1% fee
+
+        console.log('amount::', amount);
+        console.log('adminCharge::', adminCharge);
+        console.log('agentCharge::', agentCharge);
 
         let sender_query = "UPDATE users SET balance = balance - ? WHERE users_id=?";
         let receiver_query = "UPDATE users SET balance = balance + ? WHERE users_id=?";
         let select_query = "SELECT t.id,t.transaction_id,t.sender_id,sender.name AS sender_name,t.receiver_id,receiver.name AS receiver_name,t.transaction_type, t.amount,t.transaction_fees, t.transaction_date, t.final_amount, t.amount_to_collect,t.admin_charge,t.agent_charge,t.transaction_status,t.note,t.debit_amount FROM transactions t INNER JOIN users sender on t.sender_id = sender.users_id INNER JOIN users receiver ON t.receiver_id = receiver.users_id where t.id=?";
         let insert_query = "INSERT INTO transactions(`transaction_id`,`sender_id`,`receiver_id`,`transaction_type`,`amount`, `final_amount`,`note`,`amount_to_collect`,`transaction_status`,`agent_charge`,`admin_charge`,`debit_amount` ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
 
+
         if (transaction_type === 'agent_to_agent') {
             if (senderRole[0].role === 'Agent' && receiverRole[0].role === "Agent") {
                 const agentdebited = Number(amount) + Number(adminCharge);
                 // user to user transfer charges
-
+                console.log('agent to agent', agentdebited, final_amount);
                 if (Number(agentdebited) !== Number(final_amount)) {
                     return res.json({ success: false, message: "Final Transfer Amount is Mismatched  !", });
                 }
@@ -119,9 +127,15 @@ exports.TransferAmount = async (req, res) => {
         } else if (transaction_type === 'agent_to_user') {
             if (senderRole[0].role === 'Agent' && receiverRole[0].role === "User") {
                 // aget to user transfer charges
-                const chrages = (Number(agentCharge) + Number(adminCharge)).toFixed(2)
+                const chrages = (Number(agentCharge) + Number(adminCharge)).toFixed(6)
                 const agentdebited = Number(amount) + Number(adminCharge);
                 const agentCollectAmount = Number(chrages) + Number(amount);
+
+                console.log('agent to user', agentdebited, final_amount);
+                console.log('sender_balance  ', sender_balance);
+                console.log('amount_to_collect  ', amount_to_collect);
+                console.log('agentCollectAmount  ', agentCollectAmount);
+                console.log('chrages  ', chrages);
 
                 if (Number(agentdebited) !== Number(final_amount)) {
                     return res.json({ success: false, message: "Final Amount is Mismatched  !", });
@@ -168,9 +182,14 @@ exports.TransferAmount = async (req, res) => {
         } else if (transaction_type === 'user_to_agent') {
             if (senderRole[0].role === 'User' && receiverRole[0].role === "Agent") {
                 // user to agent transfer charges
-                const chrages = (Number(agentCharge) + Number(adminCharge)).toFixed(2)
+                const chrages = (Number(agentCharge) + Number(adminCharge)).toFixed(6)
                 const userdeduction = Number(amount) + Number(chrages);
                 const agentdeposite = Number(amount) + Number(agentCharge);
+
+                console.log('user to agent', agentdeposite, final_amount);
+                console.log('sender_balance  ', sender_balance);
+                console.log('userdeduction  L', userdeduction, debit_amount);
+                console.log('chrages  ', chrages);
 
                 if (Number(agentdeposite) !== Number(final_amount)) {
                     return res.json({ success: false, message: "Final Transfer Amount Mismatched  !", });
@@ -215,7 +234,7 @@ exports.TransferAmount = async (req, res) => {
 
                 // user to user transfer charges
                 const userdebited = Number(amount) + Number(adminCharge);
-
+                console.log('user to user', userdebited, final_amount);
                 if (Number(userdebited) !== Number(final_amount)) {
                     return res.json({ success: false, message: "Final Transfer Amount is Mismatched  !", });
                 }
