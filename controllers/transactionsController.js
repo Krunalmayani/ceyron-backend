@@ -41,6 +41,7 @@ exports.TransferAmount = async (req, res) => {
     const { sender_id, receiver_id, amount, transaction_type, note, final_amount, amount_to_collect, admin_charge, agent_charge, debit_amount } = req.body;
     const token = req?.headers?.authorization?.split(" ")[1];
 
+    const new_amount = Number(amount).toFixed(6);
     try {
         if (!token) {
             return res.json({ success: false, message: "auth Token not found" });
@@ -74,10 +75,10 @@ exports.TransferAmount = async (req, res) => {
 
 
 
-        const adminCharge = ((Number(amount) * Number(settings[0].admin_charge)) / 100).toFixed(6);   // Example: 1% fee
-        const agentCharge = ((Number(amount) * Number(settings[0].agent_charge)) / 100).toFixed(6);   // Example: 1% fee
+        const adminCharge = ((Number(new_amount) * Number(settings[0].admin_charge)) / 100).toFixed(6);   // Example: 1% fee
+        const agentCharge = ((Number(new_amount) * Number(settings[0].agent_charge)) / 100).toFixed(6);   // Example: 1% fee
 
-        console.log('amount::', amount);
+        console.log('amount::', new_amount);
         console.log('adminCharge::', adminCharge);
         console.log('agentCharge::', agentCharge);
 
@@ -89,7 +90,7 @@ exports.TransferAmount = async (req, res) => {
 
         if (transaction_type === 'agent_to_agent') {
             if (senderRole[0].role === 'Agent' && receiverRole[0].role === "Agent") {
-                const agentdebited = Number(amount) + Number(adminCharge);
+                const agentdebited = Number(new_amount) + Number(adminCharge);
                 // user to user transfer charges
                 console.log('agent to agent', agentdebited, final_amount);
                 if (Number(agentdebited) !== Number(final_amount)) {
@@ -128,8 +129,8 @@ exports.TransferAmount = async (req, res) => {
             if (senderRole[0].role === 'Agent' && receiverRole[0].role === "User") {
                 // aget to user transfer charges
                 const chrages = (Number(agentCharge) + Number(adminCharge)).toFixed(6)
-                const agentdebited = Number(amount) + Number(adminCharge);
-                const agentCollectAmount = Number(chrages) + Number(amount);
+                const agentdebited = Number(new_amount) + Number(adminCharge);
+                const agentCollectAmount = Number(chrages) + Number(new_amount);
 
                 console.log('agent to user', agentdebited, final_amount);
                 console.log('sender_balance  ', sender_balance);
@@ -183,8 +184,8 @@ exports.TransferAmount = async (req, res) => {
             if (senderRole[0].role === 'User' && receiverRole[0].role === "Agent") {
                 // user to agent transfer charges
                 const chrages = (Number(agentCharge) + Number(adminCharge)).toFixed(6)
-                const userdeduction = Number(amount) + Number(chrages);
-                const agentdeposite = Number(amount) + Number(agentCharge);
+                const userdeduction = Number(new_amount) + Number(chrages);
+                const agentdeposite = Number(new_amount) + Number(agentCharge);
 
                 console.log('user to agent', agentdeposite, final_amount);
                 console.log('sender_balance  ', sender_balance);
@@ -233,7 +234,7 @@ exports.TransferAmount = async (req, res) => {
             if (senderRole[0].role === 'User' && receiverRole[0].role === "User") {
 
                 // user to user transfer charges
-                const userdebited = Number(amount) + Number(adminCharge);
+                const userdebited = Number(new_amount) + Number(adminCharge);
                 console.log('user to user', userdebited, final_amount);
                 if (Number(userdebited) !== Number(final_amount)) {
                     return res.json({ success: false, message: "Final Transfer Amount is Mismatched  !", });
