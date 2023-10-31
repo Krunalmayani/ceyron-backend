@@ -92,8 +92,9 @@ exports.TransferAmount = async (req, res) => {
             if (senderRole[0].role === 'Agent' && receiverRole[0].role === "Agent") {
                 const agentdebited = Number(new_amount) + Number(adminCharge);
                 // user to user transfer charges
-                console.log('agent to agent', agentdebited, final_amount);
-                if (Number(agentdebited) !== Number(final_amount)) {
+                console.log('agent to agent', agentdebited.toFixed(6), final_amount);
+
+                if (Number(agentdebited.toFixed(6)) !== Number(final_amount)) {
                     return res.json({ success: false, message: "Final Transfer Amount is Mismatched  !", });
                 }
                 const [sender] = await connection.execute(sender_query, [agentdebited, sender_id]);
@@ -135,7 +136,7 @@ exports.TransferAmount = async (req, res) => {
                 console.log('agent to user', agentdebited, final_amount);
                 console.log('sender_balance  ', sender_balance);
                 console.log('amount_to_collect  ', amount_to_collect);
-                console.log('agentCollectAmount  ', agentCollectAmount);
+                console.log('agentCollectAmount  ', agentCollectAmount.toFixed(6));
                 console.log('chrages  ', chrages);
 
                 if (Number(agentdebited) !== Number(final_amount)) {
@@ -146,7 +147,7 @@ exports.TransferAmount = async (req, res) => {
                     return res.json({ success: false, message: "Insufficient balance. !", });
                 }
 
-                if (Number(amount_to_collect) !== Number(agentCollectAmount)) {
+                if (Number(amount_to_collect) !== Number(agentCollectAmount.toFixed(6))) {
                     return res.json({ success: false, message: "Mismatch amount to be collect", });
                 }
 
